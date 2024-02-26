@@ -142,6 +142,10 @@ print("\nxTildeTotalPower "+str(xTildeTotalPower))
 print("\nabsoluteError2 "+str(absoluteError2))
 print("relativeError2 "+str(relativeError2))
 
+#%% test the use of fftshift: does the signal in the frequency domain should have the zero frequency in the middle 
+#   to retrieve the signal in the time domain by making ifft ? NO !!
 
+xR1 = np.fft.ifft(np.fft.fft(x))
+xR2 = np.fft.ifft(np.fft.fftshift(np.fft.fft(x))) # WRONG !!
 
 
