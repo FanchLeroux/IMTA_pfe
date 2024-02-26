@@ -93,9 +93,42 @@ imagePlaneSamplingStep = imagePlaneDiameter/nPx # [m]
 pupilPlaneField = generateCircularPupil(diameter = nPx, zerosPaddingFactor = 1) 
 imagePlaneField = 1/(1j * wavelength * propagationDistance) * np.fft.fftshift(np.fft.fft2(pupilPlaneField))
 
+# Propagate back the field in image plane to the pupil plane
+
+pupilPlaneFieldBackpropagated = 1/(1j * wavelength * propagationDistance) * np.fft.fftshift(np.fft.fft2(imagePlaneField))
+
 # Check energy conservation
 
 totalPowerPupilPlane = np.sum(np.abs(pupilPlaneField)**2) * (pupilDiameter/nPx)**2
 totalPowerImagePlane = np.sum(np.abs(imagePlaneField)**2) * (wavelength * propagationDistance / pupilDiameter)**2
+
+totalPowerPupilPlaneBackpropagated = np.sum(np.abs(pupilPlaneFieldBackpropagated)**2) * (pupilDiameter/nPx)**2
+
+# print results
+
+print("\ntotalPowerPupilPlane "+str(totalPowerPupilPlane))
+print("totalPowerImagePlane "+str(totalPowerImagePlane))
+print("totalPowerPupilPlaneBackpropagated "+str(totalPowerPupilPlaneBackpropagated)+"\n")
+
+#%% test ifft(fft(x)) = x - Works
+
+x = generateCircularPupil(nPx)
+xRetrieved = np.fft.ifft2(np.fft.fft2(x))
+
+xTotalPower = np.sum(abs(x)**2)
+xRetrievedTotalPower = np.sum(abs(xRetrieved)**2)
+
+absoluteError = xRetrievedTotalPower-xTotalPower
+relativeError = absoluteError/xTotalPower
+
+print("\nxTotalPower "+str(xTotalPower))
+print("xRetrievedTotalPower "+str(xRetrievedTotalPower))
+
+print("\nabsoluteError "+str(absoluteError))
+print("relativeError "+str(relativeError))
+
+
+
+
 
 
