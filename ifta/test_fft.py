@@ -77,7 +77,7 @@ zMin = 2*np.pi/wavelength * 0.5 * pupilDiameter**2/2
 
 # Sampling parameters
 
-nPx = 32 # number of pixels in the diameter of the pupil
+nPx = 64 # number of pixels in the diameter of the pupil
 
 # consequences on the sampling of the frequency space 
 
@@ -91,11 +91,11 @@ imagePlaneSamplingStep = imagePlaneDiameter/nPx # [m]
 # Simulate the field in pupil and image plane
 
 pupilPlaneField = generateCircularPupil(diameter = nPx, zerosPaddingFactor = 1) 
-imagePlaneField = 1/(1j * wavelength * propagationDistance) * np.fft.fftshift(np.fft.fft2(pupilPlaneField))
+imagePlaneField = 1/(1j * wavelength * propagationDistance) * np.fft.fftshift(np.fft.fft2(pupilPlaneField, norm="forward"))
 
 # Propagate back the field in image plane to the pupil plane
 
-pupilPlaneFieldBackpropagated = 1/(1j * wavelength * propagationDistance) * np.fft.fftshift(np.fft.fft2(imagePlaneField))
+pupilPlaneFieldBackpropagated = 1j * wavelength * propagationDistance * np.fft.ifft2(np.fft.ifftshift(imagePlaneField), norm="forward")
 
 # Check energy conservation
 
@@ -127,20 +127,33 @@ print("xRetrievedTotalPower "+str(xRetrievedTotalPower))
 print("\nabsoluteError "+str(absoluteError))
 print("relativeError "+str(relativeError))
 
-#%% test energy(fft(x)) = energy(x) - works with normalization
+#%% test energy(fft(x)) = energy(x) - works with normalization for backward convention
 
 normalizationFactor = nPx**2
 
-xTilde = np.fft.fft2(x)
-xTildeTotalPower = np.sum(abs(xTilde)**2)/normalizationFactor
+xTilde = np.fft.fft2(x, norm="backward")
+xTildeBackwardTotalPower = np.sum(abs(xTilde)**2)/normalizationFactor
 
-absoluteError2 = xTildeTotalPower-xTotalPower
-relativeError2 = absoluteError2/xTotalPower
+absoluteErrorBackward = xTildeBackwardTotalPower-xTotalPower
+relativeErrorBackward = absoluteErrorBackward/xTotalPower
 
-print("\nxTildeTotalPower "+str(xTildeTotalPower))
+print("\nxTildeTotalPowerBackward "+str(xTildeBackwardTotalPower))
 
-print("\nabsoluteError2 "+str(absoluteError2))
-print("relativeError2 "+str(relativeError2))
+print("\nabsoluteErrorBackward "+str(absoluteErrorBackward))
+print("relativeErrorBackward "+str(relativeErrorBackward))
+
+#%% test energy(fft(x)) = energy(x) - works? with a different normalization for forward convention
+
+xTildeForward = np.fft.fft2(x, norm="forward")
+xTildeForwardTotalPower = np.sum(abs(xTildeForward)**2)*normalizationFactor
+
+absoluteErrorForward = xTildeForwardTotalPower-xTotalPower
+relativeErrorForward = absoluteErrorForward/xTotalPower
+
+print("\nxTildeTotalPowerForward "+str(xTildeForwardTotalPower))
+
+print("\nabsoluteErrorForward "+str(absoluteErrorForward))
+print("relativeErrorForward "+str(relativeErrorForward))
 
 #%% test the use of fftshift: does the signal in the frequency domain should have the zero frequency in the middle 
 #   to retrieve the signal in the time domain by making ifft ? NO !!
@@ -148,4 +161,6 @@ print("relativeError2 "+str(relativeError2))
 xR1 = np.fft.ifft(np.fft.fft(x))
 xR2 = np.fft.ifft(np.fft.fftshift(np.fft.fft(x))) # WRONG !!
 
+#%% test: what is the sampling in the frequency space given the one in the signal space ?
 
+f = np.fft.fftfreq(nPx, pupilDiameter/nPx)
