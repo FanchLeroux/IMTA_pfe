@@ -110,7 +110,7 @@ print("\ntotalPowerPupilPlane "+str(totalPowerPupilPlane))
 print("totalPowerImagePlane "+str(totalPowerImagePlane))
 print("totalPowerPupilPlaneBackpropagated "+str(totalPowerPupilPlaneBackpropagated)+"\n")
 
-#%% test ifft(fft(x)) = x - Works
+#%% test ifft(fft(x)) = x - works
 
 x = generateCircularPupil(nPx)
 xRetrieved = np.fft.ifft2(np.fft.fft2(x))
@@ -127,7 +127,20 @@ print("xRetrievedTotalPower "+str(xRetrievedTotalPower))
 print("\nabsoluteError "+str(absoluteError))
 print("relativeError "+str(relativeError))
 
+#%% test energy(fft(x)) = energy(x) - works with normalization
 
+normalizationFactor = nPx**2
+
+xTilde = np.fft.fft2(x)
+xTildeTotalPower = np.sum(abs(xTilde)**2)/normalizationFactor
+
+absoluteError2 = xTildeTotalPower-xTotalPower
+relativeError2 = absoluteError2/xTotalPower
+
+print("\nxTildeTotalPower "+str(xTildeTotalPower))
+
+print("\nabsoluteError2 "+str(absoluteError2))
+print("relativeError2 "+str(relativeError2))
 
 
 
