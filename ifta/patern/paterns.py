@@ -20,36 +20,40 @@ def cross(sizeCross, **kargs):
 # Comments : for even support size, coordinates are defined like [-2,-1,0,1] (N = 4)
 #
 # Inputs : MANDATORY : sizeCross {integer}[pixel]
-#          OPTIONAL : sizeSupport : resolution of the support {tupple (1x2)}[pixel] - default value : sizeCross
-#                     center : cartesian coordinates {tupple (1x2)}[pixel] - default value : [0,0]
+#
+#          OPTIONAL :  sizeSupport : resolution of the support {tupple (1x2)}[pixel] - default value : sizeCross
+#                      center : cartesian coordinates {tupple (1x2)}[pixel] - default value : [0,0]
+#                      width : width of the cross {integer}[pixel] - default value : 1
 #                     
-# Outputs : cross : a cross
+# Outputs : a binary cross
 #8<---------------------------------------------------------------------------------------------
 
     # read optinal parameters values
     sizeSupport = kargs.get("sizeSupport", [sizeCross,sizeCross])
     center = kargs.get("center", [0,0])
+    width = kargs.get("width", 1)
         
     cross = np.zeros(sizeSupport)
     
-    cross[sizeSupport[0]//2-center[0], 
+    cross[sizeSupport[0]//2-center[0]-width//2:sizeSupport[0]//2-center[0]+width//2+width%2, 
           sizeSupport[1]//2+center[1]-sizeCross//2:sizeSupport[1]//2+center[1]+sizeCross//2+sizeCross%2] = 1
     
     cross[sizeSupport[0]//2-center[0]-sizeCross//2:sizeSupport[0]//2-center[0]+sizeCross//2+sizeCross%2, 
-          sizeSupport[1]//2+center[1]] = 1
+          sizeSupport[1]//2+center[1]-width//2:sizeSupport[1]//2+center[1]+width//2+width%2] = 1
     
     return cross
 
-sizeCross = 3
-sizeSupport = [20,20]
+# sizeCross = 11
+# sizeSupport = [32,32]
 
-dirc = r"D:\francoisLeroux\codes\ifta\patern\outputs\\"
-filename = "cross_"+str(sizeCross)+"_"+str(sizeSupport[0])+"x"+str(sizeSupport[1])+".npy"
+# dirc = r"D:\francoisLeroux\codes\ifta\patern\outputs\\"
+# filename = "cross_"+str(sizeCross)+"_"+str(sizeSupport[0])+"x"+str(sizeSupport[1])+".npy"
 
-cross = cross(sizeCross, sizeSupport = sizeSupport)
+# cross = cross(sizeCross, sizeSupport = sizeSupport, width=5)
 
-np.save(dirc+filename, cross)
+# np.save(dirc+filename, cross)
 
-cross = np.load(dirc+filename)
+# cross = np.load(dirc+filename)
 
-plt.imshow(cross)
+# plt.imshow(cross)
+
