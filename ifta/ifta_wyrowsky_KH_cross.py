@@ -1,11 +1,9 @@
 ######################################### IFTA ESSAI KH  ###############################
-#########################################               ################################
-########################################################################################
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-from patern.paterns import cross
+from paterns import cross
 
 ############################# Directories and filenames #################################
 
@@ -58,7 +56,7 @@ recovery1 = np.absolute(np.fft.fftshift(np.fft.fft2(np.exp(pm1 * 1j))))**2 # tra
 ############################### 2nd IFTA loop - DOE quantification ##################
 # NOT gradual quantification !!! But for N>4 should be OK
 
-N=4 # Number of DOE phase levels
+N=8 # Number of DOE phase levels
 
 rfact = 1.2 # Reinforcement factor: strengthens reconstructed image. typical: 1.2
 max_iter2=40
@@ -84,8 +82,12 @@ for iter in range(max_iter2):
 recovery2 = np.absolute(np.fft.fftshift(np.fft.fft2(np.exp(phase_DOE * 1j))))**2 # transformee de Fourier pour avoir l'image finale reconstruite
 pm2 = (N*(np.pi + phase_DOE)/(2.0*np.pi))%N    # Change range from -Pi...Pi to 0...N-1
 
-plt.imshow(pm2)
-#plt.imshow(recovery2)
+fig, axs = plt.subplots(nrows=1, ncols=2)
+axs[0].imshow(pm2)
+axs[0].set_title("DOE - phase ("+str(N)+" levels)")
+axs[1].imshow(recovery2)
+axs[1].set_title("Image plane - Irradiance")
+plt.savefig(dirc+r"figures\\"+"maFigure.png")
 
 plt.imsave(doeFilename+'pm2.png', pm2)
 plt.imsave(doeFilename+'recovery2.png', recovery2)
@@ -93,5 +95,5 @@ plt.imsave(doeFilename+'recovery2.png', recovery2)
 efficiency_loop1=np.sum(recovery1[offsetX:offsetX+targSizeX,offsetY:offsetY+targSizeY])/np.sum(recovery1)*100
 efficiency_loop2=np.sum(recovery2[offsetX:offsetX+targSizeX,offsetY:offsetY+targSizeY])/np.sum(recovery2)*100
 print("DE after 1st loop = %2.2f" % efficiency_loop1)
-print("DE after 2nd loop = %2.2f" % efficiency_loop2)
+print("DE after 2nd loop = %2.2f" % efficiency_loop2) 
 
