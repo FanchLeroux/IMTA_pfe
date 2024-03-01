@@ -6,6 +6,7 @@ Created on Fri Mar  1 09:58:42 2024
 """
 
 import numpy as np
+from doe.tools import discretization
 
 def ifta(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels = 0, compute_efficiency = 0):
 
@@ -57,16 +58,15 @@ def ifta(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels = 0, compute_ef
     if n_levels != 0:
 
         for iter in range(n_iter):
-            field_DOE = np.fft.ifft2(np.fft.ifftshift(field_image))                   # field DOE = TF-1 field image
-            phase_DOE = np.angle(field_DOE) + np.pi                                   # get DOE phase. phase values between 0 and 2pi 
-            phase_DOE = np.round(phase_DOE / (2*np.pi) * (n_levels-1))                  # phase discretization. phase values between 0 and N-1
-            phase_DOE = 2*np.pi / (n_levels-1) * phase_DOE                            # discretized phase between 0 and 2pi
-            field_DOE = np.exp(phase_DOE * 1j)                                        # force the amplitude of the DOE to 1 (no losses)
-            field_image = np.fft.fftshift(np.fft.fft2(field_DOE))                     # image = TF du DOE
-            phase_image = np.angle(field_image)                                       # save image phase
+            field_DOE = np.fft.ifft2(np.fft.ifftshift(field_image))                                                         # field DOE = TF-1 field image
+            phase_DOE = np.angle(field_DOE) + np.pi                                                                         # get DOE phase. phase values between 0 and 2pi 
+            phase_DOE = discretization(phase_DOE, n_levels)                                                                 # phase discretization
+            field_DOE = np.exp(phase_DOE * 1j)                                                                              # force the amplitude of the DOE to 1 (no losses)
+            field_image = np.fft.fftshift(np.fft.fft2(field_DOE))                                                           # image = TF du DOE
+            phase_image = np.angle(field_image)                                                                             # save image phase
             amp_image[doe_size[0]//2-target_size[0]//2:doe_size[0]//2-target_size[0]//2+target_size[0], 
-                      doe_size[1]//2-target_size[1]//2:doe_size[1]//2-target_size[1]//2+target_size[1]] = rfact*target_amp # force the amplitude of the DOE to the target amplitude inside the ROI. Outside the ROI, the amplitude is free
-            field_image = amp_image*np.exp(phase_image * 1j)                          # new image field computation
+                      doe_size[1]//2-target_size[1]//2:doe_size[1]//2-target_size[1]//2+target_size[1]] = rfact*target_amp  # force the amplitude of the DOE to the target amplitude inside the ROI. Outside the ROI, the amplitude is free
+            field_image = amp_image*np.exp(phase_image * 1j)                                                                # new image field computation
 
     if compute_efficiency:
 

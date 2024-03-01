@@ -6,6 +6,7 @@ Created on Wed Feb 28 11:16:02 2024
 """
 
 import numpy as np
+from doe.tools import discretization
 
 def lens(f, *, wavelength=0.5e-6, sizeSupport=[128, 128], samplingStep=1e-4, n_levels=0):
     
@@ -25,7 +26,7 @@ def lens(f, *, wavelength=0.5e-6, sizeSupport=[128, 128], samplingStep=1e-4, n_l
 #          OPTIONAL :  wavelenght : wavelenght {float}[m] - default value: 0.5 µm
 #                      sizeSupport : resolution of the support {tupple (1x2)}[pixel] - default value: [128, 128]
 #                      samplingStep : physical length of on pixel of the support {float}[m] - default value: 1 mm
-#                      n_levels : number of levels over which the phase needs to be quntified. {int} - default value: 0, no n_levels
+#                      n_levels : number of levels over which the phase needs to be quantified. {int} - default value: 0, no discretization
 #                     
 # Outputs : pm: phase mask exp(1j*phase), phase values between 0 and 2pi
 #8<---------------------------------------------------------------------------------------------
@@ -40,8 +41,7 @@ def lens(f, *, wavelength=0.5e-6, sizeSupport=[128, 128], samplingStep=1e-4, n_l
     phase = np.angle(pm) + np.pi # phase between 0 and 2pi
     
     if n_levels != 0:
-         phase = np.round(phase * (n_levels-1) / (2*np.pi)) # phase between 0 and N-1
-         phase = phase * 2*np.pi / (n_levels-1)
+         phase = discretization(phase, n_levels)
     
     return phase
     
