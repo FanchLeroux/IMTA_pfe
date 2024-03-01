@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 
 from paterns import cross
 
+from phaseMasks import lens
+
+from tools import computeFocal
+
 ############################# Directories and filenames #################################
 
 dirc = r"D:\francoisLeroux\codes\ifta\\"
@@ -95,5 +99,5 @@ plt.imsave(doeFilename+'recovery2.png', recovery2)
 efficiency_loop1=np.sum(recovery1[offsetX:offsetX+targSizeX,offsetY:offsetY+targSizeY])/np.sum(recovery1)*100
 efficiency_loop2=np.sum(recovery2[offsetX:offsetX+targSizeX,offsetY:offsetY+targSizeY])/np.sum(recovery2)*100
 print("DE after 1st loop = %2.2f" % efficiency_loop1)
-print("DE after 2nd loop = %2.2f" % efficiency_loop2) 
+print("DE after 2nd loop = %2.2f" % efficiency_loop2)
 

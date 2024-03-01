@@ -6,12 +6,11 @@ Created on Wed Feb 28 08:45:19 2024
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 
-def cross(sizeCross, **kargs):
+def cross(sizeCross, *, center=[0,0], width=1,**kargs):
 
 #8<---------------------------------------------------------------------------------------------
-# generateCircularPupil : generate a circular pupil over a square support
+# cross : generate a cross over a square or rectangular support
 #
 # Author : Francois Leroux
 # Contact : francois.leroux.pro@gmail.com
@@ -30,8 +29,6 @@ def cross(sizeCross, **kargs):
 
     # read optinal parameters values
     sizeSupport = kargs.get("sizeSupport", [sizeCross,sizeCross])
-    center = kargs.get("center", [0,0])
-    width = kargs.get("width", 1)
         
     cross = np.zeros(sizeSupport)
     
@@ -42,18 +39,3 @@ def cross(sizeCross, **kargs):
           sizeSupport[1]//2+center[1]-width//2:sizeSupport[1]//2+center[1]+width//2+width%2] = 1
     
     return cross
-
-# sizeCross = 11
-# sizeSupport = [32,32]
-
-# dirc = r"D:\francoisLeroux\codes\ifta\patern\outputs\\"
-# filename = "cross_"+str(sizeCross)+"_"+str(sizeSupport[0])+"x"+str(sizeSupport[1])+".npy"
-
-# cross = cross(sizeCross, sizeSupport = sizeSupport, width=5)
-
-# np.save(dirc+filename, cross)
-
-# cross = np.load(dirc+filename)
-
-# plt.imshow(cross)
-
