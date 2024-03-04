@@ -49,6 +49,8 @@ def discretization(phase, n_levels):
     # Outputs : phase : the discretized phase, values between -pi and pi
     #8<---------------------------------------------------------------------------------------------
     
+    phase = np.angle(np.exp(1j*phase))                                # phase values between -pi and pi 
+    
     if n_levels == 0:
         
         return phase

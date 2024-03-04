@@ -74,8 +74,7 @@ def tilt(deltaPhi, *, wavelength=0.5e-6, sizeSupport=[128, 128], samplingStep=1e
     
     phase = X * deltaPhi
     
-    if n_levels != 0:
-         phase = discretization(phase, n_levels)
+    phase = discretization(phase, n_levels)
     
     return phase
 

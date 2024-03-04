@@ -10,5 +10,7 @@ import matplotlib.pyplot as plt
 
 from doe.phaseMasks import lens, tilt
 
-plt.imshow(tilt(deltaPhi=2*np.pi, n_levels=3))
+plt.imshow(tilt(deltaPhi=8*np.pi, n_levels=0))
+
+
 
