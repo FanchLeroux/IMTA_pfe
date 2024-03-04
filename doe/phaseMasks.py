@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Feb 28 11:16:02 2024
+Created on Wed Feb 28 11:16:02 2024 under Python 3.11.7
 
 @author: f24lerou
 """
@@ -45,7 +45,7 @@ def lens(f, *, wavelength=0.5e-6, sizeSupport=[128, 128], samplingStep=1e-4, n_l
     return phase
     
 
-def tilt(deltaPhi, *, wavelength=0.5e-6, sizeSupport=[128, 128], samplingStep=1e-4, n_levels=0):
+def tilt(deltaPhi, *, sizeSupport=[128, 128], samplingStep=1e-4, n_levels=0):
     
 #8<---------------------------------------------------------------------------------------------
 # tilt : generate a phase screen correspnding to a tilt in x
@@ -60,7 +60,6 @@ def tilt(deltaPhi, *, wavelength=0.5e-6, sizeSupport=[128, 128], samplingStep=1e
 #
 #          OPTIONAL :  wavelenght : wavelenght {float}[m] - default value: 0.5 µm
 #                      sizeSupport : resolution of the support {tupple (1x2)}[pixel] - default value: [128, 128]
-#                      samplingStep : physical length of on pixel of the support {float}[m] - default value: 1 mm
 #                      n_levels : number of levels over which the phase needs to be quantified. {int} - default value: 0, no discretization
 #                     
 # Outputs : phase, values between -pi and pi

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Mar  1 09:58:42 2024
+Created on Fri Mar  1 09:58:42 2024 under Python 3.11.7
 
 @author: f24lerou
 """
@@ -35,22 +35,22 @@ def ifta(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels = 0, compute_ef
     target_amp = np.asarray(target, float)       # conversion target to float
     target_amp = np.sqrt(target_amp)             # get target amplitude
 
-    amp_image = np.zeros(doe_size)                                                              # Amplitude output field = 0
+    amp_image = np.zeros(doe_size)                                                                             # Amplitude output field = 0
     amp_image[doe_size[0]//2-target_size[0]//2:doe_size[0]//2-target_size[0]//2+target_size[0], 
               doe_size[1]//2-target_size[1]//2:doe_size[1]//2-target_size[1]//2+target_size[1]] = target_amp   # Amplitude = target image in window
-    phase_image = 2*np.pi*np.random.rand(doe_size[0], doe_size[1])                              # Random image phase    
-    field_image = amp_image*np.exp(1j * phase_image)                                            # Initiate input field
+    phase_image = 2*np.pi*np.random.rand(doe_size[0], doe_size[1])                                             # Random image phase    
+    field_image = amp_image*np.exp(1j * phase_image)                                                           # Initiate input field
     
     # First loop - continous phase screen computation
     
     for iter in range(n_iter):
-        field_DOE = np.fft.ifft2(np.fft.ifftshift(field_image)) # field DOE = TF-1 field image
-        phase_DOE = np.angle(field_DOE)                         # save DOE phase
-        field_DOE = np.exp(phase_DOE * 1j)                      # force the amplitude of the DOE to 1 (no losses)
-        field_image = np.fft.fftshift(np.fft.fft2(field_DOE))   # field image = TF field DOE
-        phase_image = np.angle(field_image)                     # save image phase
+        field_DOE = np.fft.ifft2(np.fft.ifftshift(field_image))                                                         # field DOE = TF-1 field image
+        phase_DOE = np.angle(field_DOE)                                                                                 # save DOE phase
+        field_DOE = np.exp(phase_DOE * 1j)                                                                              # force the amplitude of the DOE to 1 (no losses)
+        field_image = np.fft.fftshift(np.fft.fft2(field_DOE))                                                           # field image = TF field DOE
+        phase_image = np.angle(field_image)                                                                             # save image phase
         amp_image[doe_size[0]//2-target_size[0]//2:doe_size[0]//2-target_size[0]//2+target_size[0], 
-                  doe_size[1]//2-target_size[1]//2:doe_size[1]//2-target_size[1]//2+target_size[1]] = rfact*target_amp # force the amplitude of the DOE to the target amplitude inside the ROI. Outside the ROI, the amplitude is free
+                  doe_size[1]//2-target_size[1]//2:doe_size[1]//2-target_size[1]//2+target_size[1]] = rfact*target_amp  # force the amplitude of the DOE to the target amplitude inside the ROI. Outside the ROI, the amplitude is free
         field_image = amp_image*np.exp(phase_image * 1j)       # new image field computation
 
     # Second loop - discretized phase screen
@@ -72,8 +72,8 @@ def ifta(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels = 0, compute_ef
 
         # Compute the image finally formed and the efficiency
     
-        recovery = np.absolute(np.fft.fftshift(np.fft.fft2(field_DOE)))**2 # Final image = |TF field DOE|^2
-        efficiency = np.sum(recovery[doe_size[0]//2-target_size[0]//2:doe_size[0]//2-target_size[0]//2+target_size[0], 
+        recovery = np.absolute(np.fft.fftshift(np.fft.fft2(field_DOE)))**2                                                  # Final image = |TF field DOE|^2
+        efficiency = np.sum(recovery[doe_size[0]//2-target_size[0]//2:doe_size[0]//2-target_size[0]//2+target_size[0],      # efficiency = energy inside target zone / total energy
                   doe_size[1]//2-target_size[1]//2:doe_size[1]//2-target_size[1]//2+target_size[1]])/np.sum(recovery)
         
         return phase_DOE, recovery, efficiency

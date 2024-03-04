@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Feb 29 13:44:30 2024
+Created on Thu Feb 29 13:44:30 2024 under Python 3.11.7
 
 @author: f24lerou
 """
@@ -57,7 +57,7 @@ def discretization(phase, n_levels):
     
     else:
     
-        phase = np.angle(np.exp(1j*phase))                            # phase values between -pi and pi 
+        #phase = np.angle(np.exp(1j*phase))                            # phase values between -pi and pi 
         phase = np.round((phase+np.pi)/ (2*np.pi) * (n_levels-1))     # phase discretization. phase values between 0 and n_levels-1
         phase = 2*np.pi / (n_levels-1) * phase - np.pi                # discretized phase between -pi and pi
     
