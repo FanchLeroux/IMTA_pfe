@@ -33,21 +33,21 @@ def computeFocal(d1, d2):
 
 def discretization(phase, n_levels):
     
-    #8<---------------------------------------------------------------------------------------------
-    # discretization : return an array of phase values between 0 and 2pi, discretized over n_levels
-    #                               
-    # Author : Francois Leroux
-    # Contact : francois.leroux.pro@gmail.com
-    # Status : done
-    # Last update : 2024.03.01, Brest
-    #
-    # Comments :
-    #
-    # Inputs : MANDATORY : phase {float}
-    #                      n_levels {int} 
-    #                     
-    # Outputs : phase : the discretized phase, values between -pi and pi
-    #8<---------------------------------------------------------------------------------------------
+#8<---------------------------------------------------------------------------------------------
+# discretization : return an array of phase values between 0 and 2pi, discretized over n_levels
+#                               
+# Author : Francois Leroux
+# Contact : francois.leroux.pro@gmail.com
+# Status : done
+# Last update : 2024.03.01, Brest
+#
+# Comments :
+#
+# Inputs : MANDATORY : phase {float}
+#                      n_levels {int} 
+#                     
+# Outputs : phase : the discretized phase, values between -pi and pi
+#8<---------------------------------------------------------------------------------------------
     
     phase = np.angle(np.exp(1j*phase))                                # phase values between -pi and pi 
     
@@ -62,3 +62,35 @@ def discretization(phase, n_levels):
         phase = 2*np.pi / (n_levels-1) * phase - np.pi                # discretized phase between -pi and pi
     
     return phase
+
+
+def getCartesianCoordinates(nrows, **kargs):
+
+#8<---------------------------------------------------------------------------------------------
+# getCartesianCoordinates : generate two arrays representing the cartesian coordinates
+#
+# Author : Francois Leroux
+# Contact : francois.leroux.pro@gmail.com
+# Status : in progress
+# Last update : 2024.03.05, Brest
+# Comments : For even support size, coordinates are defined like [-2,-1,0,1] (N = 4)
+#   
+# Inputs : MANDATORY : resolution : the array resolution [nrows]
+#                    
+# Outputs : phase, values between -pi and pi
+#8<---------------------------------------------------------------------------------------------
+    
+    # read optinal parameters values
+    ncols = kargs.get("ncols", nrows)
+
+    [X, Y] = np.meshgrid(np.arange(-ncols//2+ncols%2, ncols//2+ncols%2), 
+                         np.arange(nrows//2-1+nrows%2, -nrows//2-1+nrows%2, step=-1))
+    
+    return [X,Y]
+
+
+
+
+
+
+
