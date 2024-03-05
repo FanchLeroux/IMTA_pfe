@@ -27,16 +27,16 @@ dir_results = dirc + r"results\\"
 # 8<--------------------- Parameters ------------------------------------
 
 # target image
-sizeCross = 21
-width = 3
+sizeCross = 7
+width = 1
 
-doe_size = [128, 128]
+doe_size = [32,32]
 
-n_levels = 4
+n_levels = 8
 
 d1 = 0.01               # [m] distance laser - DOE
-d2 = 0.05               # [m] distance DOE - image plane
-doe_length = 0.5e-3     # [m] length of the side of the DOE
+d2 = 0.02               # [m] distance DOE - image plane
+doe_length = 225e-6     # [m] length of the side of the DOE
 
 wavelength = 632e-9     # [m] wavelength
 
@@ -44,7 +44,7 @@ wavelength = 632e-9     # [m] wavelength
 
 target = cross(sizeCross=sizeCross, width=width, sizeSupport = [sizeCross+10,sizeCross+10])
 
-phase_doe, recovery, efficiency = ifta(target, doe_size, n_levels=n_levels, compute_efficiency=1)
+phase_doe, recovery, efficiency = ifta(target, doe_size, n_levels=n_levels, compute_efficiency=1, rfact=1.5)
 
 f = computeFocal(d1, d2) # focal length for source - image plane conjugation
 phase_lens = lens(f, wavelength=wavelength, sizeSupport=doe_size, samplingStep=doe_length/doe_size[0], n_levels=0)
@@ -173,8 +173,10 @@ plt.tight_layout()
 nrows = 6
 ncols = 1
 
-params = ["wavelength [nm]", "d1 [cm]", "d2 [cm]", "doe side length [mm]", "doe diameter [px]", "doe pixel pitch [µm]"]
-elts = [str(wavelength*1e9), str(100*d1), str(100*d2), str(doe_length*1e3), str(doe_size), str(pp_doe_plane*1e6)]
+params = ["wavelength [nm]", "d1 [cm]", "d2 [cm]", "doe side length [mm]", "doe diameter [px]", 
+          "doe pixel pitch [µm]", "cross diameter [cm]"]
+elts = [str(wavelength*1e9), str(100*d1), str(100*d2), str(doe_length*1e3), 
+        str(doe_size), str(pp_doe_plane*1e6), str(sizeCross*pp_image_plane*100)]
 
 with open(dir_results+'params.txt', 'w') as f:
     f.write("\n\n")
