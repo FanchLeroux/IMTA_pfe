@@ -40,7 +40,6 @@ pm_lens = lens(f, wavelength=wavelength, sizeSupport=pm_size, samplingStep=sampl
 pm = pm_tilt + pm_lens
 pm_discretized = discretization(pm, n_levels=n_levels)
 
-
 fig, axs = plt.subplots(nrows=1, ncols=4)
 
 fig0=axs[0].imshow(pm_lens)

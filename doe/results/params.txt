@@ -1,0 +1,14 @@
+
+
+wavelength [nm] : 632.0
+
+d1 [cm] : 1.0
+
+d2 [cm] : 5.0
+
+doe side length [mm] : 0.5
+
+doe diameter [px] : [128, 128]
+
+doe pixel pitch [µm] : 3.90625
+
