@@ -5,6 +5,16 @@ Created on Wed Feb 28 11:16:02 2024 under Python 3.11.7
 @author: f24lerou
 """
 
+# 8<---------------------------- Add path --------------------------------
+
+import os
+import sys
+
+path = os.path.abspath(os.path.abspath('..'))
+sys.path.append(path)
+
+# 8<--------------------------- Import modules ---------------------------
+
 import numpy as np
 from doe.tools import discretization
 

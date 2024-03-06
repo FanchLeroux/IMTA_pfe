@@ -5,6 +5,16 @@ Created on Fri Mar  1 10:07:22 2024 under Python 3.11.7
 @author: f24lerou
 """
 
+# 8<---------------------------- Add path --------------------------------
+
+import os
+import sys
+
+path = os.path.abspath(os.path.abspath('..'))
+sys.path.append(path)
+
+# 8<--------------------------- Import modules ---------------------------
+
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 import numpy as np
@@ -18,16 +28,18 @@ from doe.tools import computeFocal, discretization, getCartesianCoordinates
 
 from doe.ifta import ifta
 
+
+
 # 8<---------------- Directories and filenames ---------------------------
 
-dirc = r"D:\francoisLeroux\codes\doe\\"
+dirc = os.path.abspath(os.getcwd()) + "/"
 paternFilename = dirc + r"patern\outputs\\"+"cross_5_32x32.npy"
 dir_results = dirc + r"results\\"
 
 # 8<--------------------- Parameters ------------------------------------
 
 # target image
-sizeCross = 25
+cross_size = 25
 width = 3
 
 doe_size = [64,64]
@@ -42,7 +54,7 @@ wavelength = 1e-6       # [m] wavelength
 
 # 8<--------------------- main ------------------------------------------
 
-target = cross(sizeCross=sizeCross, width=width, sizeSupport = [sizeCross+10,sizeCross+10])
+target = cross(cross_size=cross_size, width=width, sizeSupport = [cross_size+10,cross_size+10])
 
 phase_doe, recovery, efficiency = ifta(target, doe_size, n_levels=n_levels, compute_efficiency=1, rfact=1.5)
 
@@ -178,7 +190,7 @@ ncols = 1
 params = ["wavelength [nm]", "d1 [cm]", "d2 [cm]", "doe side length [µm]", "doe diameter [px]", 
           "doe pixel pitch [µm]", "cross diameter [mm]"]
 elts = [str(wavelength*1e9), str(100*d1), str(100*d2), str(doe_length*1e6), 
-        str(doe_size[0]), str(np.round(pp_doe_plane*1e6, decimals=1)), str(np.round(sizeCross*pp_image_plane*1e3, decimals=2))]
+        str(doe_size[0]), str(np.round(pp_doe_plane*1e6, decimals=1)), str(np.round(cross_size*pp_image_plane*1e3, decimals=2))]
 
 with open(dir_results+'params.txt', 'w') as f:
     f.write("\n\n")

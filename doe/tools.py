@@ -5,6 +5,16 @@ Created on Thu Feb 29 13:44:30 2024 under Python 3.11.7
 @author: f24lerou
 """
 
+# 8<---------------------------- Add path --------------------------------
+
+import os
+import sys
+
+path = os.path.abspath(os.path.abspath('..'))
+sys.path.append(path)
+
+# 8<--------------------------- Import modules ---------------------------
+
 import numpy as np
 
 def computeFocal(d1, d2):
