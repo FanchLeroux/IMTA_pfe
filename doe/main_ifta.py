@@ -27,18 +27,18 @@ dir_results = dirc + r"results\\"
 # 8<--------------------- Parameters ------------------------------------
 
 # target image
-sizeCross = 7
-width = 1
+sizeCross = 25
+width = 3
 
-doe_size = [32,32]
+doe_size = [64,64]
 
 n_levels = 8
 
 d1 = 0.01               # [m] distance laser - DOE
-d2 = 0.02               # [m] distance DOE - image plane
+d2 = 0.05               # [m] distance DOE - image plane
 doe_length = 225e-6     # [m] length of the side of the DOE
 
-wavelength = 632e-9     # [m] wavelength
+wavelength = 1e-6       # [m] wavelength
 
 # 8<--------------------- main ------------------------------------------
 
@@ -60,48 +60,50 @@ np.save(dir_results+"crossDoeLens", phase_doe_lens)
 
 print("efficiency = "+str(efficiency))
 
-fig, axs = plt.subplots(nrows=2, ncols=3)
-
-fig00=axs[0,0].imshow(target, aspect="equal")
-axs[0,0].set_title("target")
-
-fig01=axs[0,1].imshow(phase_doe)
-axs[0,1].set_title("phase_doe ("+str(n_levels)+" levels)")
-divider = make_axes_locatable(axs[0,1])
-cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(fig01, cax=cax)
-
-fig02=axs[0,2].imshow(recovery)
-axs[0,2].set_title("Image plane - Irradiance\n efficiency = "+str(round(efficiency*100))+"%")
-divider = make_axes_locatable(axs[0,2])
-cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(fig02, cax=cax)
-
-fig10=axs[1,0].imshow(phase_lens)
-axs[1,0].set_title("phase_lens")
-divider = make_axes_locatable(axs[1,0])
-cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(fig10, cax=cax)
-
-fig11=axs[1,1].imshow(phase_doe_lens)
-axs[1,1].set_title("phase_doe_lens ("+str(n_levels)+" levels)")
-divider = make_axes_locatable(axs[1,1])
-cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(fig11, cax=cax)
-
-fig12=axs[1,2].imshow(phase_doe_lens_discretized)
-axs[1,2].set_title("phase_doe_lens_discretized")
-divider = make_axes_locatable(axs[1,2])
-cax = divider.append_axes("right", size="5%", pad=0.05)
-plt.colorbar(fig12, cax=cax)
-
-plt.tight_layout()
-plt.savefig(dirc+r"figures\\"+"test.png")
+# =============================================================================
+# fig, axs = plt.subplots(nrows=2, ncols=3)
+# 
+# fig00=axs[0,0].imshow(target, aspect="equal")
+# axs[0,0].set_title("target")
+# 
+# fig01=axs[0,1].imshow(phase_doe)
+# axs[0,1].set_title("phase_doe ("+str(n_levels)+" levels)")
+# divider = make_axes_locatable(axs[0,1])
+# cax = divider.append_axes("right", size="5%", pad=0.05)
+# plt.colorbar(fig01, cax=cax)
+# 
+# fig02=axs[0,2].imshow(recovery)
+# axs[0,2].set_title("Image plane - Irradiance\n efficiency = "+str(round(efficiency*100))+"%")
+# divider = make_axes_locatable(axs[0,2])
+# cax = divider.append_axes("right", size="5%", pad=0.05)
+# plt.colorbar(fig02, cax=cax)
+# 
+# fig10=axs[1,0].imshow(phase_lens)
+# axs[1,0].set_title("phase_lens")
+# divider = make_axes_locatable(axs[1,0])
+# cax = divider.append_axes("right", size="5%", pad=0.05)
+# plt.colorbar(fig10, cax=cax)
+# 
+# fig11=axs[1,1].imshow(phase_doe_lens)
+# axs[1,1].set_title("phase_doe_lens ("+str(n_levels)+" levels)")
+# divider = make_axes_locatable(axs[1,1])
+# cax = divider.append_axes("right", size="5%", pad=0.05)
+# plt.colorbar(fig11, cax=cax)
+# 
+# fig12=axs[1,2].imshow(phase_doe_lens_discretized)
+# axs[1,2].set_title("phase_doe_lens_discretized")
+# divider = make_axes_locatable(axs[1,2])
+# cax = divider.append_axes("right", size="5%", pad=0.05)
+# plt.colorbar(fig12, cax=cax)
+# 
+# plt.tight_layout()
+# plt.savefig(dirc+r"figures\\"+"test.png")
+# =============================================================================
 
 # 8<-------------------- plots in physical units ------------------------
 
 pp_doe_plane = doe_length/doe_size[0]               # [m]
-pp_image_plane = wavelength * d2 * 1/pp_doe_plane   # [m]
+pp_image_plane = wavelength * d2 * 1/doe_length    # [m]
 
 [X,Y] = getCartesianCoordinates(nrows=doe_size[0])
 x_axis_image_plane = pp_image_plane * X[0,:]        # [m]
@@ -130,16 +132,16 @@ divider = make_axes_locatable(axs2[0,1])
 cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(fig201, cax=cax)
 
-fig202=axs2[0,2].imshow(recovery, extent=               # [cm]
-                        1e2*np.array([x_axis_image_plane[0], x_axis_image_plane[-1], y_axis_image_plane[-1], y_axis_image_plane[0]]))
+fig202=axs2[0,2].imshow(recovery, extent=                             # [mm]
+                        1e3*np.array([x_axis_image_plane[0], x_axis_image_plane[-1], y_axis_image_plane[-1], y_axis_image_plane[0]]))
 axs2[0,2].set_title("Image plane - Irradiance\n efficiency = "+str(round(efficiency*100))+"%")
-axs2[0,2].set_xlabel("[cm]")
-axs2[0,2].set_ylabel("[cm]")
+axs2[0,2].set_xlabel("[mm]")
+axs2[0,2].set_ylabel("[mm]")
 divider = make_axes_locatable(axs2[0,2])
 cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(fig202, cax=cax)
 
-fig210=axs2[1,0].imshow(phase_lens, extent=              # [µm]
+fig210=axs2[1,0].imshow(phase_lens, extent=                            # [µm]
                         1e6*np.array([x_axis_doe_plane[0], x_axis_doe_plane[-1], y_axis_doe_plane[-1], y_axis_doe_plane[0]]))
 axs2[1,0].set_title("phase_lens")
 axs2[1,0].set_xlabel("[µm]")
@@ -148,7 +150,7 @@ divider = make_axes_locatable(axs2[1,0])
 cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(fig210, cax=cax)
 
-fig211=axs2[1,1].imshow(phase_doe_lens, extent=              # [µm]
+fig211=axs2[1,1].imshow(phase_doe_lens, extent=                        # [µm]
                         1e6*np.array([x_axis_doe_plane[0], x_axis_doe_plane[-1], y_axis_doe_plane[-1], y_axis_doe_plane[0]]))
 axs2[1,1].set_title("phase_doe_lens ("+str(n_levels)+" levels)")
 axs2[1,1].set_xlabel("[µm]")
@@ -157,7 +159,7 @@ divider = make_axes_locatable(axs2[1,1])
 cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(fig211, cax=cax)
 
-fig212=axs2[1,2].imshow(phase_doe_lens_discretized, extent=              # [µm]
+fig212=axs2[1,2].imshow(phase_doe_lens_discretized, extent=            # [µm]
                         1e6*np.array([x_axis_doe_plane[0], x_axis_doe_plane[-1], y_axis_doe_plane[-1], y_axis_doe_plane[0]]))
 axs2[1,2].set_title("phase_doe_lens_discretized")
 axs2[1,2].set_xlabel("[µm]")
@@ -168,15 +170,15 @@ plt.colorbar(fig212, cax=cax)
 
 plt.tight_layout()
 
-############ table ################
+############ param file ################
 
 nrows = 6
 ncols = 1
 
-params = ["wavelength [nm]", "d1 [cm]", "d2 [cm]", "doe side length [mm]", "doe diameter [px]", 
-          "doe pixel pitch [µm]", "cross diameter [cm]"]
-elts = [str(wavelength*1e9), str(100*d1), str(100*d2), str(doe_length*1e3), 
-        str(doe_size), str(pp_doe_plane*1e6), str(sizeCross*pp_image_plane*100)]
+params = ["wavelength [nm]", "d1 [cm]", "d2 [cm]", "doe side length [µm]", "doe diameter [px]", 
+          "doe pixel pitch [µm]", "cross diameter [mm]"]
+elts = [str(wavelength*1e9), str(100*d1), str(100*d2), str(doe_length*1e6), 
+        str(doe_size[0]), str(np.round(pp_doe_plane*1e6, decimals=1)), str(np.round(sizeCross*pp_image_plane*1e3, decimals=2))]
 
 with open(dir_results+'params.txt', 'w') as f:
     f.write("\n\n")
