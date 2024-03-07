@@ -26,7 +26,7 @@ from doe.phaseScreens import lens
 
 from doe.tools import computeFocal, discretization, getCartesianCoordinates
 
-from doe.ifta import ifta
+from doe.ifta import ifta, iftaSoftQuantization
 
 
 
@@ -44,7 +44,7 @@ width = 3
 
 doe_size = [128, 128]
 
-n_levels = 3
+n_levels = 2
 
 d1 = 0.01               # [m] distance laser - DOE
 d2 = 0.05               # [m] distance DOE - image plane
@@ -56,7 +56,8 @@ wavelength = 850e-9     # [m] wavelength - VSCEL: VC850S-SMD
 
 target = cross(cross_size=cross_size, width=width, sizeSupport = [cross_size+10,cross_size+10])
 
-phase_doe, recovery, efficiency = ifta(target, doe_size, n_levels=n_levels, compute_efficiency=1, rfact=1.5)
+phase_doe, recovery, efficiency = ifta(target, doe_size, n_levels=n_levels, compute_efficiency=1, rfact=1.2, n_iter=100)
+phase_doe_soft, recovery_soft, efficiency_soft = iftaSoftQuantization(target, doe_size, n_levels=n_levels, compute_efficiency=1, rfact=1.2, n_iter=100)
 
 f = computeFocal(d1, d2) # focal length for source - image plane conjugation
 phase_lens = lens(f, wavelength=wavelength, sizeSupport=doe_size, samplingStep=doe_length/doe_size[0], n_levels=0)
@@ -71,6 +72,7 @@ np.save(dir_results+"crossDoeLens", phase_doe_lens)
 
 
 print("efficiency = "+str(efficiency))
+print("efficiency_soft = "+str(efficiency_soft))
 
 # 8<-------------------- plots in physical units ------------------------
 

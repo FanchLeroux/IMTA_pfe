@@ -95,23 +95,20 @@ def softDiscretization(phase, n_levels, half_interval):
 # Outputs : phase : the discretized phase, values between 0 and 2pi - 2pi/n_levels
 #8<---------------------------------------------------------------------------------------------
     
-    phase = np.angle(np.exp(1j*phase))                                # phase values between -pi and pi 
-    
     if n_levels == 0:
         
         return phase
     
     else:
     
-        phase = np.angle(np.exp(1j*phase)) + np.pi                           # continuous phase values between 0 and 2pi 
-        phase = phase * (n_levels-1)/(2*np.pi)                               # continuous phase values between 0 and n_levels-1
+        phase = np.remainder(phase, 2*np.pi)                          # continuous phase values between 0 and 2pi
+        phase = phase * (n_levels)/(2*np.pi)                          # continuous phase values between 0 and n_levels 
+        phase[np.remainder(phase,1)<=half_interval] = np.round(phase[np.remainder(phase,1)<=half_interval])                # phase soft discretization. discrete phase values between 0 and n_levels-1
+        phase[np.remainder(phase,1)>=1-half_interval] = np.round(phase[np.remainder(phase,1)>=1-half_interval])        # phase soft discretization. discrete phase values between 0 and n_levels-1
+        phase = 2*np.pi / n_levels * phase                            # discretized phase between 0 and 2pi
+        phase = np.remainder(phase, 2*np.pi)                          # discretized phase between 0 and 2pi - 2pi/n_levels
         
-        phase[np.remainder(phase,1)<=half_interval] = np.round(phase[np.remainder(phase,1)<=half_interval])        # phase soft discretization. discrete phase values between 0 and n_levels-1
-        
-        phase = 2*np.pi / n_levels * phase                                   # discretized phase between 0 and 2pi - 2pi/n_levels
-    
     return phase
-
 
 
 def getCartesianCoordinates(nrows, **kargs):
