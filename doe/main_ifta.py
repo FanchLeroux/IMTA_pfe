@@ -44,7 +44,7 @@ width = 3
 
 doe_size = [128, 128]
 
-n_levels = 2
+n_levels = 3
 
 d1 = 0.01               # [m] distance laser - DOE
 d2 = 0.05               # [m] distance DOE - image plane
