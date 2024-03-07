@@ -73,7 +73,7 @@ def ifta(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels = 0, compute_ef
 
         for iter in range(n_iter):
             field_DOE = np.fft.ifft2(np.fft.ifftshift(field_image))                                                         # field DOE = TF-1 field image
-            phase_DOE = np.angle(field_DOE) + np.pi                                                                         # get DOE phase. phase values between 0 and 2pi 
+            phase_DOE = np.angle(field_DOE)                                                                                 # get DOE phase. phase values between 0 and 2pi 
             phase_DOE = discretization(phase_DOE, n_levels)                                                                 # phase discretization
             field_DOE = np.exp(phase_DOE * 1j)                                                                              # force the amplitude of the DOE to 1 (no losses)
             field_image = np.fft.fftshift(np.fft.fft2(field_DOE))                                                           # image = TF du DOE
