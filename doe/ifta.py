@@ -87,8 +87,9 @@ def ifta(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels = 0, compute_ef
         # Compute the image finally formed and the efficiency
     
         recovery = np.absolute(np.fft.fftshift(np.fft.fft2(field_DOE)))**2                                                  # Final image = |TF field DOE|^2
-        efficiency = np.sum(recovery[doe_size[0]//2-target_size[0]//2:doe_size[0]//2-target_size[0]//2+target_size[0],      # efficiency = energy inside target zone / total energy
-                  doe_size[1]//2-target_size[1]//2:doe_size[1]//2-target_size[1]//2+target_size[1]])/np.sum(recovery)
+        roi = recovery[doe_size[0]//2-target_size[0]//2:doe_size[0]//2-target_size[0]//2+target_size[0],      # efficiency = energy inside target zone / total energy
+                  doe_size[1]//2-target_size[1]//2:doe_size[1]//2-target_size[1]//2+target_size[1]]
+        efficiency = np.sum(roi[target!=0])/np.sum(recovery)
         
         return phase_DOE, recovery, efficiency
 
@@ -161,8 +162,9 @@ def iftaSoftQuantization(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels
         # Compute the image finally formed and the efficiency
     
         recovery = np.absolute(np.fft.fftshift(np.fft.fft2(field_DOE)))**2                                                  # Final image = |TF field DOE|^2
-        efficiency = np.sum(recovery[doe_size[0]//2-target_size[0]//2:doe_size[0]//2-target_size[0]//2+target_size[0],      # efficiency = energy inside target zone / total energy
-                  doe_size[1]//2-target_size[1]//2:doe_size[1]//2-target_size[1]//2+target_size[1]])/np.sum(recovery)
+        roi = recovery[doe_size[0]//2-target_size[0]//2:doe_size[0]//2-target_size[0]//2+target_size[0],      # efficiency = energy inside target zone / total energy
+                  doe_size[1]//2-target_size[1]//2:doe_size[1]//2-target_size[1]//2+target_size[1]]
+        efficiency = np.sum(roi[target!=0])/np.sum(recovery)
         
         return phase_DOE, recovery, efficiency
 

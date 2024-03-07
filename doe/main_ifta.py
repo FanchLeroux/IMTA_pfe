@@ -38,19 +38,65 @@ dir_results = dirc + r"results\\"
 
 # 8<--------------------- Parameters -------------------------------------
 
+        ################# Requierments ###################
+        
+# geometry        
+d1 = 0.01                                   # [m] distance laser - DOE
+d2 = 0.01                                   # [m] distance DOE - image plane
+target_length = 0.005                       # [m] target side length
+
+# limits
+light_collection_efficiency_mini = 0.5      # minimal ratio between the energy emitted by the VCSEL and the incident energy on the DOE
+doe_efficiency_mini = 0.7                   # minimal doe efficiency (ratio energy in ROI / total energy in image plane) 
+
+        ########### Constraints from hardware #############
+        
+wavelength = 850e-9     # [m] wavelength - VSCEL: VC850S-SMD
+divergence = 8          # [°] gaussian beam divergence (full angle) - VSCEL: VC850S-SMD
+#fringe_length_mini 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # target image
-cross_size = 100
+cross_size = 20
 width = 3
 
 doe_size = [128, 128]
 
-n_levels = 4
+n_levels = 2
 
 d1 = 0.01               # [m] distance laser - DOE
 d2 = 0.01               # [m] distance DOE - image plane
 doe_length = 225e-6     # [m] length of the side of the DOE
 
-wavelength = 850e-9     # [m] wavelength - VSCEL: VC850S-SMD
+
 
 # 8<--------------------- main -------------------------------------------
 

@@ -12,5 +12,5 @@ doe diameter [px] : 128
 
 doe pixel pitch [µm] : 1.8
 
-cross diameter [mm] : 3.78
+cross diameter [mm] : 0.76
 
