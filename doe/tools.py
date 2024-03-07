@@ -52,14 +52,14 @@ def discretization(phase, n_levels):
 # Author : Francois Leroux
 # Contact : francois.leroux.pro@gmail.com
 # Status : done
-# Last update : 2024.03.01, Brest
+# Last update : 2024.03.07, Brest
 #
 # Comments :
 #
 # Inputs : MANDATORY : phase {float}
 #                      n_levels {int} 
 #                     
-# Outputs : phase : the discretized phase, values between -pi and pi
+# Outputs : phase : the discretized phase, values between 0 and 2pi - 2pi/n_levels
 #8<---------------------------------------------------------------------------------------------
     
     phase = np.angle(np.exp(1j*phase))                                # phase values between -pi and pi 
@@ -70,9 +70,10 @@ def discretization(phase, n_levels):
     
     else:
     
-        #phase = np.angle(np.exp(1j*phase))                            # phase values between -pi and pi 
-        phase = np.round((phase+np.pi)/ (2*np.pi) * (n_levels-1))     # phase discretization. phase values between 0 and n_levels-1
-        phase = 2*np.pi / (n_levels-1) * phase - np.pi                # discretized phase between -pi and pi
+        phase = np.angle(np.exp(1j*phase)) + np.pi                    # continuous phase values between 0 and 2pi 
+        phase = phase * (n_levels-1)/(2*np.pi)                        # continuous phase values between 0 and n_levels-1 
+        phase = np.round(phase)                                       # phase discretization. discrete phase values between 0 and n_levels-1
+        phase = 2*np.pi / n_levels * phase                            # discretized phase between 0 and 2pi - 2pi/n_levels
     
     return phase
 
@@ -130,13 +131,13 @@ def gaussianEfficiency(wavelength, distance, x_half_extent, **kargs):
 #8<---------------------------------------------------------------------------------------------    
     
     y_half_extent = kargs.get("y_half_extent", x_half_extent)
-    divergence = kargs.get("divergence", None)
+    divergence = kargs.get("divergence", np.nan)
     w_0 = kargs.get("w_0", wavelength/(np.pi * np.tan(np.pi/180 * divergence/2)))
-    divergence = kargs.get("divergence", 2 * wavelength / (np.pi*w_0) * 180/np.pi) # [deg]
+    divergence = kargs.get("divergence", 2 * np.arctan(wavelength / (np.pi*w_0)) * 180/np.pi) # [deg]
     
     divergence = np.pi/180 * divergence # [deg] to [rad] conversion
     
-    z_0 = np.pi*w_0**2/wavelength
+    z_0 = np.pi*w_0**2/wavelength # Rayleigh length
     w_z = w_0 * (1 + (distance / z_0)**2)**0.5 # half width at 1/e of the maximum amplitude
     
     f = lambda y, x: np.exp(-(x**2+y**2)/w_z**2)**2 # irradince = amplitude^2 
@@ -144,7 +145,7 @@ def gaussianEfficiency(wavelength, distance, x_half_extent, **kargs):
     energy, _ = integrate.dblquad(f, -x_half_extent, x_half_extent, -y_half_extent, y_half_extent)
     energy_total = np.pi * w_z**2 / 2 # Gauss integral, irradiance
         
-    return energy/energy_total, w_z, w_0
+    return energy/energy_total, w_0, divergence * 180/np.pi
 
 
 

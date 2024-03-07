@@ -49,8 +49,7 @@ def lens(f, *, wavelength=0.5e-6, sizeSupport=[128, 128], samplingStep=1e-4, n_l
     X = samplingStep * X
     Y = samplingStep * Y
     
-    pm = np.exp(-1j * 2*np.pi/wavelength * 1/(2*f) * (X**2 + Y**2))
-    phase = np.angle(pm)  # phase between -pi and pi
+    phase = 2*np.pi/wavelength * 1/(2*f) * (X**2 + Y**2)
     
     if n_levels != 0:
          phase = discretization(phase, n_levels)

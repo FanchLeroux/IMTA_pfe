@@ -8,9 +8,9 @@ d2 [cm] : 5.0
 
 doe side length [µm] : 225.0
 
-doe diameter [px] : 64
+doe diameter [px] : 128
 
-doe pixel pitch [µm] : 3.5
+doe pixel pitch [µm] : 1.8
 
 cross diameter [mm] : 4.72
 
