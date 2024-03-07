@@ -39,15 +39,15 @@ dir_results = dirc + r"results\\"
 # 8<--------------------- Parameters -------------------------------------
 
 # target image
-cross_size = 25
+cross_size = 100
 width = 3
 
 doe_size = [128, 128]
 
-n_levels = 2
+n_levels = 4
 
 d1 = 0.01               # [m] distance laser - DOE
-d2 = 0.05               # [m] distance DOE - image plane
+d2 = 0.01               # [m] distance DOE - image plane
 doe_length = 225e-6     # [m] length of the side of the DOE
 
 wavelength = 850e-9     # [m] wavelength - VSCEL: VC850S-SMD
