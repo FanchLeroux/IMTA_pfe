@@ -1,6 +1,6 @@
 
 
-wavelength [nm] : 1000.0
+wavelength [nm] : 850.0
 
 d1 [cm] : 1.0
 
@@ -12,5 +12,5 @@ doe diameter [px] : 64
 
 doe pixel pitch [µm] : 3.5
 
-cross diameter [mm] : 5.56
+cross diameter [mm] : 4.72
 

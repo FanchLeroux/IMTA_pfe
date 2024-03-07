@@ -19,7 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from doe.tools import computeFocal, discretization
-from doe.phaseMasks import lens, tilt
+from doe.phaseScreens import lens, tilt
 
 # 8<---------------- Directories and filenames ---------------------------
 

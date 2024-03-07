@@ -16,7 +16,8 @@ sys.path.append(path)
 # 8<--------------------------- Import modules ---------------------------
 
 import numpy as np
-from doe.tools import getCartesianCoordinates
+
+# 8<------------------------- Functions definitions ----------------------
 
 def cross(cross_size, *, center=[0,0], width=1,**kargs):
 

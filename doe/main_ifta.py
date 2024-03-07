@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 from doe.paterns import cross
 
-from doe.phaseMasks import lens
+from doe.phaseScreens import lens
 
 from doe.tools import computeFocal, discretization, getCartesianCoordinates
 
@@ -36,7 +36,7 @@ dirc = os.path.abspath(os.getcwd()) + "/"
 paternFilename = dirc + r"patern\outputs\\"+"cross_5_32x32.npy"
 dir_results = dirc + r"results\\"
 
-# 8<--------------------- Parameters ------------------------------------
+# 8<--------------------- Parameters -------------------------------------
 
 # target image
 cross_size = 25
@@ -50,9 +50,9 @@ d1 = 0.01               # [m] distance laser - DOE
 d2 = 0.05               # [m] distance DOE - image plane
 doe_length = 225e-6     # [m] length of the side of the DOE
 
-wavelength = 1e-6       # [m] wavelength
+wavelength = 850e-9     # [m] wavelength - VSCEL: VC850S-SMD
 
-# 8<--------------------- main ------------------------------------------
+# 8<--------------------- main -------------------------------------------
 
 target = cross(cross_size=cross_size, width=width, sizeSupport = [cross_size+10,cross_size+10])
 
@@ -64,7 +64,7 @@ phase_lens = lens(f, wavelength=wavelength, sizeSupport=doe_size, samplingStep=d
 phase_doe_lens = phase_doe + phase_lens
 phase_doe_lens_discretized = discretization(phase_doe+phase_lens, n_levels)
 
-# 8<-------------------- results ----------------------------------------
+# 8<-------------------- results -----------------------------------------
 
 np.save(dir_results+"crossDoe", phase_doe)
 np.save(dir_results+"crossDoeLens", phase_doe_lens)
