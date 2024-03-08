@@ -17,11 +17,6 @@ sys.path.append(path)
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from sympy.solvers import solve
-from sympy import Symbol
-from sympy import integrate
-from sympy import exp
-
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -29,8 +24,8 @@ from doe.paterns import cross
 
 from doe.phaseScreens import lens
 
-from doe.tools import computeFocal, discretization, getCartesianCoordinates, gaussianEfficiency
-
+from doe.tools import computeFocal, discretization, getCartesianCoordinates
+from doe.gaussianBeams import getGaussianBeamRadius, getMinimalCollectorLength
 from doe.ifta import ifta, iftaSoftQuantization
 
 
@@ -54,65 +49,42 @@ target_length = 0.005                       # [m] target side length
 light_collection_efficiency_mini = 0.5      # minimal ratio between the energy emitted by the VCSEL and the incident energy on the DOE
 doe_efficiency_mini = 0.7                   # minimal doe efficiency (ratio energy in ROI / total energy in image plane) 
 
-        ########### Constraints from hardware #############
+        ########## Constraints from hardware #############
         
-wavelength = 850e-9     # [m] wavelength - VSCEL: VC850S-SMD
-divergence = 8          # [°] gaussian beam divergence (full angle) - VSCEL: VC850S-SMD
-#fringe_length_mini 
+wavelength = 850e-9             # [m] wavelength - VSCEL: VC850S-SMD
+divergence = 8                  # [°] gaussian beam divergence (full angle) - VSCEL: VC850S-SMD
+fringe_length_mini = 2e-6       # [m] fabrication constaint minimal width of the fringes at the edges of the fresnel lens
+optic_pp = 750e-9               # [m] pixel pitch on optic plane, imposed by the fabrication process
+
 
         ################# Consequences ####################
-        
-w_0 = wavelength/(np.pi * np.tan(np.pi/180 * divergence/2))        
-z_0 = np.pi*w_0**2/wavelength # Rayleigh length
-w_z = w_0 * (1 + (d1 / z_0)**2)**0.5 # half width at 1/e of the maximum amplitude
 
-doe_length_mini = 0                          # [m] minimal doe side length for matching the light_collection_efficiency_mini 
-                                             #     requierment given the gaussian beam parameters
+# laser waist
+w_z = getGaussianBeamRadius(wavelength=wavelength, divergence=divergence, propagation_distance=d1)
+optic_length_mini = getMinimalCollectorLength(w_z=w_z, efficiency=light_collection_efficiency_mini)
 
+        ################### Arbitrage #######################
 
-
-x = Symbol("x")
-y = Symbol("y")
-f = exp(-(x**2+y**2)/w_z**2)**2
-x_half_extent = Symbol("x_half_extent")
-x_half_extent_mini = solve(integrate(f, (x, -x_half_extent, x_half_extent), (y, -x_half_extent, x_half_extent))/(np.pi * w_z**2 / 2)-light_collection_efficiency_mini, x_half_extent)
-x_half_extent_mini = x_half_extent_mini[1]
-
-light_collection_efficiency = gaussianEfficiency(wavelength=wavelength, distance=d1, x_half_extent=x_half_extent_mini, divergence=divergence)
+optic_length = 1.1*optic_length_mini
+n_replication = 2
+doe_length = optic_length/n_replication                 # [m] doe side length, n_replication x n_replication replication 
+doe_size = [int(doe_length//optic_pp)]*2                # [px] doe size
+doe_length = doe_size[0] * optic_pp                        # [m] doe side length after sampling
+optic_length = n_replication * doe_length               # [m] optic side length after sampling
 
 
+image_pp = wavelength * d2 * 1/doe_length # [m] pixel pitch in image plane
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+target_size = target_length//image_pp     # [px] image size
 
 # target image
 cross_size = 20
 width = 3
 
-doe_size = [128, 128]
+#doe_size = [128, 128]
 
 n_levels = 2
-
-d1 = 0.01               # [m] distance laser - DOE
-d2 = 0.01               # [m] distance DOE - image plane
-doe_length = 225e-6     # [m] length of the side of the DOE
-
-
+print(doe_size)
 
 # 8<--------------------- main -------------------------------------------
 
@@ -132,6 +104,13 @@ phase_doe_lens_discretized = discretization(phase_doe+phase_lens, n_levels)
 np.save(dir_results+"crossDoe", phase_doe)
 np.save(dir_results+"crossDoeLens", phase_doe_lens)
 
+
+print("optic_length_mini = "+str(round(optic_length_mini*1e6, ndigits=1))+" µm")
+print("optic_length = "+str(round(optic_length*1e6, ndigits=1))+" µm")
+print("doe_length = "+str(round(doe_length*1e6, ndigits=1))+" µm")
+print("doe_size = "+str(doe_size[0])+" px\n")
+
+print("image_pp = "+str(round(image_pp*1e6))+" µm\n")
 
 print("efficiency = "+str(efficiency))
 print("efficiency_soft = "+str(efficiency_soft))

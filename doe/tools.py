@@ -16,7 +16,6 @@ sys.path.append(path)
 # 8<--------------------------- Import modules ---------------------------
 
 import numpy as np
-from scipy import integrate
 
 # 8<------------------------- Functions definitions ----------------------
 
@@ -136,49 +135,6 @@ def getCartesianCoordinates(nrows, **kargs):
                          np.arange(nrows//2-1+nrows%2, -nrows//2-1+nrows%2, step=-1))
     
     return [X,Y]
-
-
-def gaussianEfficiency(wavelength, distance, x_half_extent, **kargs):
-    
-#8<---------------------------------------------------------------------------------------------
-# gaussianEfficiency : compute the efficiency, i.e the ratio between the light emmited and collected 
-#                      in the transverse plane for a given extent
-#
-# Author : Francois Leroux
-# Contact : francois.leroux.pro@gmail.com
-# Status : in progress
-# Last update : 2024.03.05, Brest
-# Comments : integration methods:        https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.dblquad.html#scipy.integrate.dblquad
-#                                        https://fr.wikipedia.org/wiki/Int%C3%A9grale_de_Gauss
-#            
-#            gaussian beam propagation : https://fr.wikipedia.org/wiki/Faisceau_gaussien 
-#   
-# Inputs : MANDATORY : wavelength [m] : the laser wavelength
-#                      distance [m] : the propagation distance 
-#                      at least one optional keyword argument, either divergence or w_0 
-#
-#          OPTIONAL : w_0 [m] : the laser waist
-#                     divergence {float}[°] : the laser divergence (full angle)  
-#                    
-# Outputs : efficiency : the efficiency
-#8<---------------------------------------------------------------------------------------------    
-    
-    y_half_extent = kargs.get("y_half_extent", x_half_extent)
-    divergence = kargs.get("divergence", np.nan)
-    w_0 = kargs.get("w_0", wavelength/(np.pi * np.tan(np.pi/180 * divergence/2)))
-    divergence = kargs.get("divergence", 2 * np.arctan(wavelength / (np.pi*w_0)) * 180/np.pi) # [deg]
-    
-    divergence = np.pi/180 * divergence # [deg] to [rad] conversion
-    
-    z_0 = np.pi*w_0**2/wavelength # Rayleigh length
-    w_z = w_0 * (1 + (distance / z_0)**2)**0.5 # half width at 1/e of the maximum amplitude
-    
-    f = lambda y, x: np.exp(-(x**2+y**2)/w_z**2)**2 # irradince = amplitude^2 
-    
-    energy, _ = integrate.dblquad(f, -x_half_extent, x_half_extent, -y_half_extent, y_half_extent)
-    energy_total = np.pi * w_z**2 / 2 # Gauss integral, irradiance
-        
-    return energy/energy_total
 
 
 
