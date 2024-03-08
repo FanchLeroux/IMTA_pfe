@@ -72,6 +72,10 @@ def getMinimalCollectorLength(w_z, efficiency):
         
     return float(length_mini)
 
+def getFocalLength():
+    
+    return
+
 
 def gaussianEfficiency(wavelength, distance, x_half_extent, **kargs):
     

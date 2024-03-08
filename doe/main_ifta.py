@@ -42,8 +42,9 @@ dir_results = dirc + r"results\\"
         
 # geometry        
 d1 = 0.01                                   # [m] distance laser - DOE
-d2 = 0.01                                   # [m] distance DOE - image plane
-target_length = 0.005                       # [m] target side length
+d2 = 0.03                                   # [m] distance DOE - image plane
+target_length = 0.003                       # [m] target side length
+target_width = target_length/5              # [m] target width
 
 # limits
 light_collection_efficiency_mini = 0.5      # minimal ratio between the energy emitted by the VCSEL and the incident energy on the DOE
@@ -69,26 +70,21 @@ optic_length = 1.1*optic_length_mini
 n_replication = 2
 doe_length = optic_length/n_replication                 # [m] doe side length, n_replication x n_replication replication 
 doe_size = [int(doe_length//optic_pp)]*2                # [px] doe size
-doe_length = doe_size[0] * optic_pp                        # [m] doe side length after sampling
+doe_length = doe_size[0] * optic_pp                     # [m] doe side length after sampling
 optic_length = n_replication * doe_length               # [m] optic side length after sampling
 
 
-image_pp = wavelength * d2 * 1/doe_length # [m] pixel pitch in image plane
-
-target_size = target_length//image_pp     # [px] image size
+image_pp = wavelength * d2 * 1/doe_length               # [m] pixel pitch in image plane
 
 # target image
-cross_size = 20
-width = 3
-
-#doe_size = [128, 128]
+target_size = int(target_length//image_pp)              # [px] image size
+width = int(target_width//image_pp)                     # [px] image size
 
 n_levels = 2
-print(doe_size)
 
 # 8<--------------------- main -------------------------------------------
 
-target = cross(cross_size=cross_size, width=width, sizeSupport = [cross_size+10,cross_size+10])
+target = cross(cross_size=target_size, width=width, support_size = [target_size+10,target_size+10])
 
 phase_doe, recovery, efficiency = ifta(target, doe_size, n_levels=n_levels, compute_efficiency=1, rfact=1.2, n_iter=100)
 phase_doe_soft, recovery_soft, efficiency_soft = iftaSoftQuantization(target, doe_size, n_levels=n_levels, compute_efficiency=1, rfact=1.2, n_iter=100)
@@ -105,17 +101,18 @@ np.save(dir_results+"crossDoe", phase_doe)
 np.save(dir_results+"crossDoeLens", phase_doe_lens)
 
 
-print("optic_length_mini = "+str(round(optic_length_mini*1e6, ndigits=1))+" µm")
+print("\noptic_length_mini = "+str(round(optic_length_mini*1e6, ndigits=1))+" µm")
 print("optic_length = "+str(round(optic_length*1e6, ndigits=1))+" µm")
 print("doe_length = "+str(round(doe_length*1e6, ndigits=1))+" µm")
 print("doe_size = "+str(doe_size[0])+" px\n")
 
+print("optic_pp = "+str(round(optic_pp*1e9))+" nm")
 print("image_pp = "+str(round(image_pp*1e6))+" µm\n")
 
 print("efficiency = "+str(efficiency))
 print("efficiency_soft = "+str(efficiency_soft))
 
-# 8<-------------------- plots in physical units ------------------------
+#%% 8<-------------------- plots in physical units ------------------------
 
 pp_doe_plane = doe_length/doe_size[0]               # [m]
 pp_image_plane = wavelength * d2 * 1/doe_length     # [m]
@@ -190,7 +187,7 @@ plt.tight_layout()
 params = ["wavelength [nm]", "d1 [cm]", "d2 [cm]", "doe side length [µm]", "doe diameter [px]", 
           "doe pixel pitch [µm]", "cross diameter [mm]"]
 elts = [str(wavelength*1e9), str(100*d1), str(100*d2), str(doe_length*1e6), 
-        str(doe_size[0]), str(np.round(pp_doe_plane*1e6, decimals=1)), str(np.round(cross_size*pp_image_plane*1e3, decimals=2))]
+        str(doe_size[0]), str(np.round(pp_doe_plane*1e6, decimals=1)), str(np.round(target_size*pp_image_plane*1e3, decimals=2))]
 
 with open(dir_results+'params.txt', 'w') as f:
     f.write("\n\n")
