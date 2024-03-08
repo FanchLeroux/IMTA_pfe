@@ -17,6 +17,11 @@ sys.path.append(path)
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+from sympy.solvers import solve
+from sympy import Symbol
+from sympy import integrate
+from sympy import exp
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -24,7 +29,7 @@ from doe.paterns import cross
 
 from doe.phaseScreens import lens
 
-from doe.tools import computeFocal, discretization, getCartesianCoordinates
+from doe.tools import computeFocal, discretization, getCartesianCoordinates, gaussianEfficiency
 
 from doe.ifta import ifta, iftaSoftQuantization
 
@@ -55,14 +60,25 @@ wavelength = 850e-9     # [m] wavelength - VSCEL: VC850S-SMD
 divergence = 8          # [°] gaussian beam divergence (full angle) - VSCEL: VC850S-SMD
 #fringe_length_mini 
 
+        ################# Consequences ####################
+        
+w_0 = wavelength/(np.pi * np.tan(np.pi/180 * divergence/2))        
+z_0 = np.pi*w_0**2/wavelength # Rayleigh length
+w_z = w_0 * (1 + (d1 / z_0)**2)**0.5 # half width at 1/e of the maximum amplitude
+
+doe_length_mini = 0                          # [m] minimal doe side length for matching the light_collection_efficiency_mini 
+                                             #     requierment given the gaussian beam parameters
 
 
 
+x = Symbol("x")
+y = Symbol("y")
+f = exp(-(x**2+y**2)/w_z**2)**2
+x_half_extent = Symbol("x_half_extent")
+x_half_extent_mini = solve(integrate(f, (x, -x_half_extent, x_half_extent), (y, -x_half_extent, x_half_extent))/(np.pi * w_z**2 / 2)-light_collection_efficiency_mini, x_half_extent)
+x_half_extent_mini = x_half_extent_mini[1]
 
-
-
-
-
+light_collection_efficiency = gaussianEfficiency(wavelength=wavelength, distance=d1, x_half_extent=x_half_extent_mini, divergence=divergence)
 
 
 

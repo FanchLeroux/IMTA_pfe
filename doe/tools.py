@@ -178,7 +178,7 @@ def gaussianEfficiency(wavelength, distance, x_half_extent, **kargs):
     energy, _ = integrate.dblquad(f, -x_half_extent, x_half_extent, -y_half_extent, y_half_extent)
     energy_total = np.pi * w_z**2 / 2 # Gauss integral, irradiance
         
-    return energy/energy_total, w_0, divergence * 180/np.pi
+    return energy/energy_total
 
 
 
