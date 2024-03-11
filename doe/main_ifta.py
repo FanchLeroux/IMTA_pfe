@@ -24,8 +24,8 @@ from doe.paterns import cross
 
 from doe.phaseScreens import lens
 
-from doe.tools import computeFocal, discretization, getCartesianCoordinates
-from doe.gaussianBeams import getGaussianBeamRadius, getMinimalCollectorLength
+from doe.tools import discretization, getCartesianCoordinates
+from doe.gaussianBeams import getGaussianBeamRadius, getMinimalCollectorLength, getFocalLength
 from doe.ifta import ifta, iftaSoftQuantization
 
 
@@ -41,8 +41,8 @@ dir_results = dirc + r"results\\"
         ################# Requierments ###################
         
 # geometry        
-d1 = 0.01                                   # [m] distance laser - DOE
-d2 = 0.03                                   # [m] distance DOE - image plane
+d1 = 0.01                                   # [m] distance laser object waist - DOE
+d2 = 0.03                                   # [m] distance DOE - image plane (image waist)
 target_length = 0.003                       # [m] target side length
 target_width = target_length/5              # [m] target width
 
@@ -57,6 +57,7 @@ divergence = 8                  # [°] gaussian beam divergence (full angle) - V
 fringe_length_mini = 2e-6       # [m] fabrication constaint minimal width of the fringes at the edges of the fresnel lens
 optic_pp = 750e-9               # [m] pixel pitch on optic plane, imposed by the fabrication process
 
+#%%
 
         ################# Consequences ####################
 
@@ -89,7 +90,7 @@ target = cross(cross_size=target_size, width=width, support_size = [target_size+
 phase_doe, recovery, efficiency = ifta(target, doe_size, n_levels=n_levels, compute_efficiency=1, rfact=1.2, n_iter=100)
 phase_doe_soft, recovery_soft, efficiency_soft = iftaSoftQuantization(target, doe_size, n_levels=n_levels, compute_efficiency=1, rfact=1.2, n_iter=100)
 
-f = computeFocal(d1, d2) # focal length for source - image plane conjugation
+[f, diff] = getFocalLength(d1, d2, wavelength, divergence) # focal length for source - image plane conjugation
 phase_lens = lens(f, wavelength=wavelength, sizeSupport=doe_size, samplingStep=doe_length/doe_size[0], n_levels=0)
 
 phase_doe_lens = phase_doe + phase_lens
@@ -182,17 +183,17 @@ plt.colorbar(fig212, cax=cax)
 
 plt.tight_layout()
 
-# 8<------------------------------- param file --------------------------------------
+# 8<------------------------------- param text file --------------------------------------
 
 params = ["wavelength [nm]", "d1 [cm]", "d2 [cm]", "doe side length [µm]", "doe diameter [px]", 
           "doe pixel pitch [µm]", "cross diameter [mm]"]
 elts = [str(wavelength*1e9), str(100*d1), str(100*d2), str(doe_length*1e6), 
         str(doe_size[0]), str(np.round(pp_doe_plane*1e6, decimals=1)), str(np.round(target_size*pp_image_plane*1e3, decimals=2))]
 
-with open(dir_results+'params.txt', 'w') as f:
-    f.write("\n\n")
+with open(dir_results+'params.txt', 'w') as file:
+    file.write("\n\n")
     for k in range(len(params)):        
-            f.write(params[k] + " : " + elts[k] + "\n\n")
+            file.write(params[k] + " : " + elts[k] + "\n\n")
             
             
 

@@ -33,8 +33,8 @@ def computeFocal(d1, d2):
 #
 # Comments :
 #
-# Inputs : MANDATORY : d1 {float}[m]
-#                      d2 {float}[m] 
+# Inputs : MANDATORY : d1 {float}[m] : absolute distance object point - lens
+#                      d2 {float}[m] : absolute distance lens - image point
 #                     
 # Outputs : f : the focal lenght of the corresponding convergent lens
 #8<---------------------------------------------------------------------------------------------

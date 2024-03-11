@@ -25,7 +25,7 @@ import sympy
 def getGaussianBeamRadius(wavelength, divergence, propagation_distance):
     
 #8<---------------------------------------------------------------------------------------------
-# getGaussianBeamDiameter : compute the half width at 1/e of the maximum amplitude (i.e 1/e^2 of the maximum intensity)
+# getGaussianBeamDiameter : compute the radius (half width at 1/e of the maximum amplitude, i.e 1/e^2 of the maximum intensity)
 #                           for a gaussian beam with a given divergence that has been propagated over a given distance 
 # Author : Francois Leroux
 # Contact : francois.leroux.pro@gmail.com
@@ -72,9 +72,43 @@ def getMinimalCollectorLength(w_z, efficiency):
         
     return float(length_mini)
 
-def getFocalLength():
+def getFocalLength(d1, d2, wavelength, divergence):
+
+#8<---------------------------------------------------------------------------------------------
+# getFocalLength : compute the focal length of a thin lens in order to conjugate the object waist of a gaussian beam at a 
+#                  distance d1 from the lens to the image waist at a distance d2 from the lens, according to the modified 
+#                  thin lens equation.  
+#                  
+# Author : Francois Leroux
+# Contact : francois.leroux.pro@gmail.com
+# Status : in progress
+# Last update : 2024.03.11, Brest
+# Comments : modified thin lens equation : https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=14511 
+#            WARNING : can return negative values   
+#
+# Inputs : MANDATORY : d1 {float}[m] : absolute distance object point - lens
+#                      d2 {float}[m] : absolute distance lens - image point 
+#                      wavelength {float}[m] : wavelength
+#                      divergence {float}[°] : the laser divergence (full angle)
+#                     
+# Outputs : f_modified_thin_lens_formula : the focal lenght of the corresponding convergent lens
+#8<-----------------------------------------------------------------------------------------------        
     
-    return
+    w_0 = wavelength/(np.pi * np.tan(np.pi/180 * divergence/2))
+    zr = np.pi * w_0**2 / wavelength # object space Rayleigh range
+    f = sympy.Symbol("f")
+    f_modified_thin_lens_formula = sympy.solvers.solve(1/(d1+zr**2/(d1-f))+1/d2-1/f, f)
+    f_modified_thin_lens_formula = [float(f_modified_thin_lens_formula[0]), float(f_modified_thin_lens_formula[1])]
+    
+    f_thin_lens_formula = d1*d2/(d1+d2)
+    
+    diff = [float(f_modified_thin_lens_formula[0])-f_thin_lens_formula, 
+            float(f_modified_thin_lens_formula[1])-f_thin_lens_formula]
+    
+    f_modified_thin_lens_formula = f_modified_thin_lens_formula[diff==min(diff)]
+    diff = min(diff)
+    
+    return f_modified_thin_lens_formula, diff
 
 
 def gaussianEfficiency(wavelength, distance, x_half_extent, **kargs):
