@@ -59,7 +59,7 @@ holo_efficiency_mini = 0.7                  # minimal holo efficiency (ratio ene
         ########## Constraints from hardware #############
         
 wavelength = 850e-9             # [m] wavelength - VSCEL: VC850S-SMD
-divergence = 8                  # [°] gaussian beam divergence (full angle) - VSCEL: VC850S-SMD
+divergence = 16                 # [°] gaussian beam divergence (full angle) - VSCEL: VC850S-SMD
 fringe_length_mini = 2e-6       # [m] fabrication constaint minimal width of the fringes at the edges of the fresnel lens
 optic_pp = 750e-9               # [m] pixel pitch on optic plane, imposed by the fabrication process
 
@@ -166,25 +166,27 @@ with open(dir_results+'params.txt', 'w') as file:
 #%% 8<-------------------- plots in physical units ------------------------
 
 [X,Y] = getCartesianCoordinates(nrows=holo_size[0])
-x_axis_image_plane = image_pp * X[0,:]        # [m]
-y_axis_image_plane = image_pp * Y[:,0]        # [m]
-x_axis_holo_plane = optic_pp * X[0,:]                # [m]
-y_axis_holo_plane = optic_pp * Y[:,0]                # [m]
+x_axis_image_plane = image_pp * X[0,:]                    # [m]
+y_axis_image_plane = image_pp * Y[:,0]                    # [m]
+x_axis_holo_plane = optic_pp * X[0,:]                     # [m]
+y_axis_holo_plane = optic_pp * Y[:,0]                     # [m]
 
 [X,Y] = getCartesianCoordinates(nrows=target.shape[0])
-x_axis_target = image_pp * X[0,:]             # [m]
-y_axis_target = image_pp * Y[:,0]             # [m]
+x_axis_target = image_pp * X[0,:]                         # [m]
+y_axis_target = image_pp * Y[:,0]                         # [m]
 
 fig2, axs2 = plt.subplots(nrows=2, ncols=3)
 
 fig200=axs2[0,0].imshow(target, aspect="equal", extent=                       # [cm]
-                        1e2*np.array([x_axis_target[0], x_axis_target[-1], y_axis_target[-1], y_axis_target[0]]))
+                        1e2*np.array([x_axis_target[0], x_axis_target[-1], 
+                                      y_axis_target[-1], y_axis_target[0]]))
 axs2[0,0].set_title("target")
 axs2[0,0].set_xlabel("[cm]")
 axs2[0,0].set_ylabel("[cm]")
 
 fig201=axs2[0,1].imshow(phase_holo, extent=                                    # [µm]
-                        1e6*np.array([x_axis_holo_plane[0], x_axis_holo_plane[-1], y_axis_holo_plane[-1], y_axis_holo_plane[0]]))
+                        1e6*np.array([x_axis_holo_plane[0], x_axis_holo_plane[-1], 
+                                      y_axis_holo_plane[-1], y_axis_holo_plane[0]]))
 axs2[0,1].set_title("phase_holo ("+str(n_levels)+" levels)")
 axs2[0,1].set_xlabel("[µm]")
 axs2[0,1].set_ylabel("[µm]")
@@ -193,7 +195,8 @@ cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(fig201, cax=cax)
 
 fig202=axs2[0,2].imshow(recovery, extent=                                     # [mm]
-                        1e3*np.array([x_axis_image_plane[0], x_axis_image_plane[-1], y_axis_image_plane[-1], y_axis_image_plane[0]]))
+                        1e3*np.array([x_axis_image_plane[0], x_axis_image_plane[-1], 
+                                      y_axis_image_plane[-1], y_axis_image_plane[0]]))
 axs2[0,2].set_title("Image plane - Irradiance\n efficiency = "+str(round(efficiency*100))+"%")
 axs2[0,2].set_xlabel("[mm]")
 axs2[0,2].set_ylabel("[mm]")
@@ -202,7 +205,8 @@ cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(fig202, cax=cax)
 
 fig210=axs2[1,0].imshow(phase_lens, extent=                                   # [µm]
-                        1e6*np.array([x_axis_holo_plane[0], x_axis_holo_plane[-1], y_axis_holo_plane[-1], y_axis_holo_plane[0]]))
+                        1e6*np.array([x_axis_holo_plane[0], x_axis_holo_plane[-1], 
+                                      y_axis_holo_plane[-1], y_axis_holo_plane[0]]))
 axs2[1,0].set_title("phase_lens")
 axs2[1,0].set_xlabel("[µm]")
 axs2[1,0].set_ylabel("[µm]")
@@ -211,7 +215,8 @@ cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(fig210, cax=cax)
 
 fig211=axs2[1,1].imshow(phase_holo_lens, extent=                               # [µm]
-                        1e6*np.array([x_axis_holo_plane[0], x_axis_holo_plane[-1], y_axis_holo_plane[-1], y_axis_holo_plane[0]]))
+                        1e6*np.array([x_axis_holo_plane[0], x_axis_holo_plane[-1], 
+                                      y_axis_holo_plane[-1], y_axis_holo_plane[0]]))
 axs2[1,1].set_title("phase_holo_lens ("+str(n_levels)+" levels)")
 axs2[1,1].set_xlabel("[µm]")
 axs2[1,1].set_ylabel("[µm]")
@@ -220,7 +225,8 @@ cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(fig211, cax=cax)
 
 fig212=axs2[1,2].imshow(phase_holo_lens_discretized, extent=                   # [µm]
-                        1e6*np.array([x_axis_holo_plane[0], x_axis_holo_plane[-1], y_axis_holo_plane[-1], y_axis_holo_plane[0]]))
+                        1e6*np.array([x_axis_holo_plane[0], x_axis_holo_plane[-1], 
+                                      y_axis_holo_plane[-1], y_axis_holo_plane[0]]))
 axs2[1,2].set_title("phase_holo_lens_discretized")
 axs2[1,2].set_xlabel("[µm]")
 axs2[1,2].set_ylabel("[µm]")
