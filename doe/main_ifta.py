@@ -111,36 +111,69 @@ phase_lens = lens(f, wavelength=wavelength, sizeSupport=holo_size, samplingStep=
 phase_holo_lens = phase_holo + phase_lens
 phase_holo_lens_discretized = discretization(phase_holo+phase_lens, n_levels)
 
-# 8<-------------------- results -----------------------------------------
+#%% 8<-------------------- results -----------------------------------------
 
 np.save(dir_results+"crossholo", phase_holo)
 np.save(dir_results+"crossholoLens", phase_holo_lens)
 
+#%% 8<------------------------------- param text file --------------------------------------
 
-print("\noptic_length_mini = "+str(round(optic_length_mini*1e6, ndigits=1))+" µm")
-print("optic_length = "+str(round(optic_length*1e6, ndigits=1))+" µm")
-print("holo_length = "+str(round(holo_length*1e6, ndigits=1))+" µm")
-print("holo_size = "+str(holo_size[0])+" px\n")
+params = ["light collection requierment",
+          "wavelength [nm]", 
+          "d1 [cm]", 
+          "d2 [cm]", 
+          "hologram side length [µm]", 
+          
+          "hologram diameter [px]",          
+          "number of replication in X and Y",
+          "optic side length [µm]",
+          "optic side length mini (light collection requierment) [µm]",
+          "optic side length maxi (thin fringes requierments) [µm]",
+          
+          "optic pixel pitch [nm]",
+          "target image diameter [mm]",
+          "focal length [mm]",         
+          "relative difference between thin lens formula \n\tand modified thin lens formula",
+          "hologram efficiency - no soft quantization",
+          
+          "hologram efficiency - with phase soft quantization"]
 
-print("optic_pp = "+str(round(optic_pp*1e9))+" nm")
-print("image_pp = "+str(round(image_pp*1e6))+" µm\n")
+elts = [str(light_collection_efficiency_mini) + "\n",
+        str(wavelength*1e9), 
+        str(100*d1), 
+        str(100*d2) + "\n", 
+        str(np.round(holo_length*1e6, decimals=2)), 
+        
+        str(holo_size[0]) + "\n",
+        str(n_replication),
+        str(np.round(optic_length*1e6, decimals=1)),
+        str(np.round(optic_length_mini*1e6, decimals=1)),
+        str(np.round(optic_length_maxi*1e6, decimals=1)),
+        
+        str(np.round(optic_pp*1e9, decimals=1)) + "\n",
+        str(np.round(target_size*image_pp*1e3, decimals=2)) + "\n",
+        str(np.round(f*1e3, decimals=1)),
+        str(np.round(diff/f, decimals=6)) + "\n",
+        str(np.round(efficiency, decimals=4)),
+        
+        str(np.round(efficiency_soft, decimals=4))]
 
-print("efficiency = "+str(efficiency))
-print("efficiency_soft = "+str(efficiency_soft))
+with open(dir_results+'params.txt', 'w') as file:
+    file.write("\n\n")
+    for k in range(len(params)):        
+            file.write("\t" + params[k] + " : " + elts[k] + "\n")
 
 #%% 8<-------------------- plots in physical units ------------------------
 
-pp_image_plane = wavelength * d2 * 1/holo_length     # [m]
-
 [X,Y] = getCartesianCoordinates(nrows=holo_size[0])
-x_axis_image_plane = pp_image_plane * X[0,:]        # [m]
-y_axis_image_plane = pp_image_plane * Y[:,0]        # [m]
+x_axis_image_plane = image_pp * X[0,:]        # [m]
+y_axis_image_plane = image_pp * Y[:,0]        # [m]
 x_axis_holo_plane = optic_pp * X[0,:]                # [m]
 y_axis_holo_plane = optic_pp * Y[:,0]                # [m]
 
 [X,Y] = getCartesianCoordinates(nrows=target.shape[0])
-x_axis_target = pp_image_plane * X[0,:]             # [m]
-y_axis_target = pp_image_plane * Y[:,0]             # [m]
+x_axis_target = image_pp * X[0,:]             # [m]
+y_axis_target = image_pp * Y[:,0]             # [m]
 
 fig2, axs2 = plt.subplots(nrows=2, ncols=3)
 
@@ -196,57 +229,3 @@ cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(fig212, cax=cax)
 
 plt.tight_layout()
-
-#%% 8<------------------------------- param text file --------------------------------------
-
-params = ["light collection requierment",
-          "wavelength [nm]", 
-          "d1 [cm]", 
-          "d2 [cm]", 
-          "hologram side length [µm]", 
-          
-          "hologram diameter [px]",          
-          "number of replication in X and Y",
-          "optic side length [µm]",
-          "optic side length mini (light collection requierment) [µm]",
-          "optic side length maxi (thin fringes requierments) [µm]",
-          
-          "optic pixel pitch [nm]",
-          "cross diameter [mm]",
-          "focal length [mm]",         
-          "relative difference between thin lens formula \n\tand modified thin lens formula",
-          "hologram efficiency - no soft quantization",
-          
-          "hologram efficiency - with phase soft quantization"]
-
-elts = [str(light_collection_efficiency_mini) + "\n",
-        str(wavelength*1e9), 
-        str(100*d1), 
-        str(100*d2) + "\n", 
-        str(np.round(holo_length*1e6, decimals=2)), 
-        
-        str(holo_size[0]) + "\n",
-        str(n_replication),
-        str(np.round(optic_length*1e6, decimals=1)),
-        str(np.round(optic_length_mini*1e6, decimals=1)),
-        str(np.round(optic_length_maxi*1e6, decimals=1)),
-        
-        str(np.round(optic_pp*1e9, decimals=1)) + "\n",
-        str(np.round(target_size*pp_image_plane*1e3, decimals=2)) + "\n",
-        str(np.round(f*1e3, decimals=1)),
-        str(np.round(diff/f, decimals=6)) + "\n",
-        str(np.round(efficiency, decimals=4)),
-        
-        str(np.round(efficiency_soft, decimals=4))]
-
-with open(dir_results+'params.txt', 'w') as file:
-    file.write("\n\n")
-    for k in range(len(params)):        
-            file.write("\t" + params[k] + " : " + elts[k] + "\n")
-            
-            
-
-
-
-
-

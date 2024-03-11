@@ -1,2 +1,9 @@
-ifta/fromKevin/
-ifta/patern/outputs/
+doe/fromKevin/
+
+doe/results/
+
+doe/__pycache__/
+
+doe/figures/
+
+metalenses/figures

@@ -15,11 +15,11 @@
 	optic side length maxi (thin fringes requierments) [µm] : 2251.3
 	optic pixel pitch [nm] : 750.0
 
-	cross diameter [mm] : 9.95
+	target image diameter [mm] : 9.95
 
 	focal length [mm] : 7.5
 	relative difference between thin lens formula 
 	and modified thin lens formula : 9.2e-05
 
-	hologram efficiency - no soft quantization : 0.7963
-	hologram efficiency - with phase soft quantization : 0.7953
+	hologram efficiency - no soft quantization : 0.7964
+	hologram efficiency - with phase soft quantization : 0.7951
