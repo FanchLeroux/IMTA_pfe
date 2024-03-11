@@ -89,7 +89,9 @@ def tilt(deltaPhi, *, sizeSupport=[128, 128], samplingStep=1e-4, n_levels=0):
     
     return phase
 
-
+def getSideLengthMaxi():
+    
+    return
 
 
 

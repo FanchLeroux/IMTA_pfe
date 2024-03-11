@@ -43,7 +43,7 @@ dir_results = dirc + r"results\\"
 # geometry        
 d1 = 0.01                                   # [m] distance laser object waist - DOE
 d2 = 0.03                                   # [m] distance DOE - image plane (image waist)
-target_length = 0.003                       # [m] target side length
+target_length = 0.01                       # [m] target side length
 target_width = target_length/5              # [m] target width
 
 # limits
@@ -70,7 +70,8 @@ optic_length_mini = getMinimalCollectorLength(w_z=w_z, efficiency=light_collecti
 optic_length = 1.1*optic_length_mini
 n_replication = 2
 doe_length = optic_length/n_replication                 # [m] doe side length, n_replication x n_replication replication 
-doe_size = [int(doe_length//optic_pp)]*2                # [px] doe size
+doe_size = int(doe_length//optic_pp)                    # [px] doe size
+doe_size = [doe_size + doe_size%2]*2                    # [px] doe size (even)
 doe_length = doe_size[0] * optic_pp                     # [m] doe side length after sampling
 optic_length = n_replication * doe_length               # [m] optic side length after sampling
 
@@ -115,14 +116,13 @@ print("efficiency_soft = "+str(efficiency_soft))
 
 #%% 8<-------------------- plots in physical units ------------------------
 
-pp_doe_plane = doe_length/doe_size[0]               # [m]
 pp_image_plane = wavelength * d2 * 1/doe_length     # [m]
 
 [X,Y] = getCartesianCoordinates(nrows=doe_size[0])
 x_axis_image_plane = pp_image_plane * X[0,:]        # [m]
 y_axis_image_plane = pp_image_plane * Y[:,0]        # [m]
-x_axis_doe_plane = pp_doe_plane * X[0,:]            # [m]
-y_axis_doe_plane = pp_doe_plane * Y[:,0]            # [m]
+x_axis_doe_plane = optic_pp * X[0,:]                # [m]
+y_axis_doe_plane = optic_pp * Y[:,0]                # [m]
 
 [X,Y] = getCartesianCoordinates(nrows=target.shape[0])
 x_axis_target = pp_image_plane * X[0,:]             # [m]
@@ -183,17 +183,48 @@ plt.colorbar(fig212, cax=cax)
 
 plt.tight_layout()
 
-# 8<------------------------------- param text file --------------------------------------
+#%% 8<------------------------------- param text file --------------------------------------
 
-params = ["wavelength [nm]", "d1 [cm]", "d2 [cm]", "doe side length [µm]", "doe diameter [px]", 
-          "doe pixel pitch [µm]", "cross diameter [mm]"]
-elts = [str(wavelength*1e9), str(100*d1), str(100*d2), str(doe_length*1e6), 
-        str(doe_size[0]), str(np.round(pp_doe_plane*1e6, decimals=1)), str(np.round(target_size*pp_image_plane*1e3, decimals=2))]
+params = ["light collection requierment",
+          "wavelength [nm]", 
+          "d1 [cm]", 
+          "d2 [cm]", 
+          "doe side length [µm]", 
+          
+          "doe diameter [px]",          
+          "number of replication in X and Y",
+          "optic side length [µm]",
+          "optic side length mini (light collection requierment) [µm]",
+          "optic pixel pitch [nm]",
+          
+          "cross diameter [mm]",
+          "focal length [mm]",         
+          "relative difference between thin lens formula \n\tand modified thin lens formula",
+          "DOE efficiency - no soft quantization",
+          "DOE efficiency - with phase soft quantization"]
+
+elts = [str(light_collection_efficiency_mini) + "\n",
+        str(wavelength*1e9), 
+        str(100*d1), 
+        str(100*d2) + "\n", 
+        str(np.round(doe_length*1e6, decimals=2)), 
+        
+        str(doe_size[0]) + "\n",
+        str(n_replication),
+        str(np.round(optic_length*1e6, decimals=1)),
+        str(np.round(optic_length_mini*1e6, decimals=1)),
+        str(np.round(optic_pp*1e9, decimals=1)) + "\n",        
+        
+        str(np.round(target_size*pp_image_plane*1e3, decimals=2)) + "\n",
+        str(np.round(f*1e3, decimals=1)),
+        str(np.round(diff/f, decimals=6)) + "\n",
+        str(np.round(efficiency, decimals=4)),
+        str(np.round(efficiency_soft, decimals=4))]
 
 with open(dir_results+'params.txt', 'w') as file:
     file.write("\n\n")
     for k in range(len(params)):        
-            file.write(params[k] + " : " + elts[k] + "\n\n")
+            file.write("\t" + params[k] + " : " + elts[k] + "\n")
             
             
 

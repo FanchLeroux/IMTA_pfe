@@ -1,16 +1,24 @@
 
 
-wavelength [nm] : 850.0
+	light collection requierment : 0.5
 
-d1 [cm] : 1.0
+	wavelength [nm] : 850.0
+	d1 [cm] : 1.0
+	d2 [cm] : 3.0
 
-d2 [cm] : 3.0
+	doe side length [µm] : 405.0
+	doe diameter [px] : 540
 
-doe side length [µm] : 404.25
+	number of replication in X and Y : 2
+	optic side length [µm] : 810.0
+	optic side length mini (light collection requierment) [µm] : 735.5
+	optic pixel pitch [nm] : 750.0
 
-doe diameter [px] : 539
+	cross diameter [mm] : 9.95
 
-doe pixel pitch [µm] : 0.8
+	focal length [mm] : 7.5
+	relative difference between thin lens formula 
+	and modified thin lens formula : 9.2e-05
 
-cross diameter [mm] : 2.96
-
+	DOE efficiency - no soft quantization : 0.7962
+	DOE efficiency - with phase soft quantization : 0.7961
