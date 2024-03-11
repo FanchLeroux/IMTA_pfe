@@ -46,10 +46,10 @@ def getGaussianBeamRadius(wavelength, divergence, propagation_distance):
     
     return w_z
 
-def getMinimalCollectorLength(w_z, efficiency):
+def getCollectorLengthMini(w_z, efficiency):
     
 #8<---------------------------------------------------------------------------------------------
-# getMinimalCollectorLength : compute minimal length
+# getCollectorLengthMini : compute minimal length
 # Author : Francois Leroux
 # Contact : francois.leroux.pro@gmail.com
 # Status : in progress
@@ -74,7 +74,7 @@ def getMinimalCollectorLength(w_z, efficiency):
 
 def getFocalLength(d1, d2, wavelength, divergence):
 
-#8<---------------------------------------------------------------------------------------------
+#8<-------------------------------------------------------------------------------------------------------
 # getFocalLength : compute the focal length of a thin lens in order to conjugate the object waist of a gaussian beam at a 
 #                  distance d1 from the lens to the image waist at a distance d2 from the lens, according to the modified 
 #                  thin lens equation.  
@@ -92,7 +92,9 @@ def getFocalLength(d1, d2, wavelength, divergence):
 #                      divergence {float}[°] : the laser divergence (full angle)
 #                     
 # Outputs : f_modified_thin_lens_formula : the focal lenght of the corresponding convergent lens
-#8<-----------------------------------------------------------------------------------------------        
+#           diff : absolute difference between the focal length computed with the modified of normal
+#                  thin lens formula
+#8<-------------------------------------------------------------------------------------------------------
     
     w_0 = wavelength/(np.pi * np.tan(np.pi/180 * divergence/2))
     zr = np.pi * w_0**2 / wavelength # object space Rayleigh range

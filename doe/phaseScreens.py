@@ -16,6 +16,7 @@ sys.path.append(path)
 # 8<--------------------------- Import modules ---------------------------
 
 import numpy as np
+import sympy
 from doe.tools import discretization
 
 # 8<------------------------- Functions definitions ----------------------
@@ -89,9 +90,34 @@ def tilt(deltaPhi, *, sizeSupport=[128, 128], samplingStep=1e-4, n_levels=0):
     
     return phase
 
-def getSideLengthMaxi():
+def getOpticSideLengthMaxi(wavelength, f, fringe_length_mini):
     
-    return
+#8<---------------------------------------------------------------------------------------------
+# getOpticSideLengthMaxi : compute the maximal side length of a binary Fresnel lens phase screen 
+#                          in order to avoid too thin fringes at the edges
+#
+# Author : Francois Leroux
+# Contact : francois.leroux.pro@gmail.com
+# Status : in progress
+# Last update : 2024.03.11, Brest
+# Comments : Delta_R (radial distance over which we have a 2pi phase shift) = (-2R + sqrt(4R^2+8*wavelength*f))/2
+#            with R the radial coordinate                                     
+#   
+# Inputs : MANDATORY : wavelength {float}[m] : wavelength
+#                      f {float}[m] : focal length of the lens
+#                      fringe_length_mini {float}[m] : minimal length for a fringe (1 pseudo periode = 2 fringes)
+#                      pixel_pitch {float}[m] : pixel pitch
+#                     
+# Outputs : side_length_maxi {float} [m] : maximal side length of a binary Fresnel lens phase screen 
+#                                          in order to avoid too thin fringes at the edges
+#8<---------------------------------------------------------------------------------------------    
+    
+    side_length_maxi = sympy.Symbol("side_length_maxi")
+    side_length_maxi = np.asarray(sympy.solvers.solve(((4*side_length_maxi**2+8*wavelength*f)**0.5-2*side_length_maxi)/2-2*fringe_length_mini, 
+                        side_length_maxi), dtype = float)
+    side_length_maxi = 2*side_length_maxi[side_length_maxi>=0]/2**0.5
+
+    return side_length_maxi[0]
 
 
 

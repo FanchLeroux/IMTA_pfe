@@ -6,12 +6,13 @@
 	d1 [cm] : 1.0
 	d2 [cm] : 3.0
 
-	doe side length [µm] : 405.0
-	doe diameter [px] : 540
+	hologram side length [µm] : 405.0
+	hologram diameter [px] : 540
 
 	number of replication in X and Y : 2
 	optic side length [µm] : 810.0
 	optic side length mini (light collection requierment) [µm] : 735.5
+	optic side length maxi (thin fringes requierments) [µm] : 2251.3
 	optic pixel pitch [nm] : 750.0
 
 	cross diameter [mm] : 9.95
@@ -20,5 +21,5 @@
 	relative difference between thin lens formula 
 	and modified thin lens formula : 9.2e-05
 
-	DOE efficiency - no soft quantization : 0.7962
-	DOE efficiency - with phase soft quantization : 0.7961
+	hologram efficiency - no soft quantization : 0.7963
+	hologram efficiency - with phase soft quantization : 0.7953

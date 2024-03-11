@@ -67,11 +67,11 @@ def discretization(phase, n_levels):
     
     else:
     
-        phase = np.remainder(phase, 2*np.pi)                          # continuous phase values between 0 and 2pi
-        phase = phase * (n_levels)/(2*np.pi)                          # continuous phase values between 0 and n_levels 
-        phase = np.round(phase)                                       # phase discretization. discrete phase values between 0 and n_levels-1
-        phase = 2*np.pi / n_levels * phase                            # discretized phase between 0 and 2pi
-        phase = np.remainder(phase, 2*np.pi)                          # discretized phase between 0 and 2pi - 2pi/n_levels
+        phase = np.remainder(phase, 2*np.pi)         # continuous phase values between 0 and 2pi
+        phase = phase * (n_levels)/(2*np.pi)         # continuous phase values between 0 and n_levels 
+        phase = np.round(phase)                      # phase discretization. discrete phase values between 0 and n_levels
+        phase = 2*np.pi / n_levels * phase           # discretized phase between 0 and 2pi
+        phase = np.remainder(phase, 2*np.pi)         # discretized phase between 0 and 2pi - 2pi/n_levels
         
     return phase
 
