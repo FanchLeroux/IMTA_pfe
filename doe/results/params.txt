@@ -21,5 +21,5 @@
 	relative difference between thin lens formula 
 	and modified thin lens formula : 6e-06
 
-	hologram efficiency - no soft quantization : 0.7969
+	hologram efficiency - no soft quantization : 0.7967
 	hologram efficiency - with phase soft quantization : 0.7972

@@ -5,15 +5,21 @@ Created on Fri Mar  1 10:07:22 2024 under Python 3.11.7
 @author: f24lerou
 """
 
-# 8<---------------------------- Add path --------------------------------
+# 8<------------------------------------------ Add path ---------------------------------------
 
 import os
 import sys
 
-path = os.path.abspath(os.path.abspath('..'))
+path = os.path.abspath(os.path.abspath('..')) # path = 'D:\\francoisLeroux\\codes'
 sys.path.append(path)
 
-# 8<--------------------------- Import modules ---------------------------
+#%% 8<------------------------------ Directories and filenames --------------------------------
+
+dirc = os.path.abspath(os.getcwd()) + r"\\"
+paternFilename = dirc + r"patern\outputs\\"+"cross_5_32x32.npy"
+dir_results = dirc + r"results\\"
+
+#%% 8<-------------------------------------- Import modules -----------------------------------
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
@@ -28,17 +34,9 @@ from doe.tools import discretization, getCartesianCoordinates
 from doe.gaussianBeams import getGaussianBeamRadius, getCollectorLengthMini, getFocalLength
 from doe.ifta import ifta, iftaSoftQuantization
 
+#%% 8<------------------------------------ Parameters ------------------------------------------
 
-
-# 8<---------------- Directories and filenames ---------------------------
-
-dirc = os.path.abspath(os.getcwd()) + "/"
-paternFilename = dirc + r"patern\outputs\\"+"cross_5_32x32.npy"
-dir_results = dirc + r"results\\"
-
-# 8<--------------------- Parameters -------------------------------------
-
-        ################# Requierments ###################
+                         ################# Requierments ###################
         
 # geometry        
 d1 = 0.01                                   # [m] distance laser object waist - holo
@@ -56,16 +54,14 @@ n_replication = 2                           # number of time the hologram should
 light_collection_efficiency_mini = 0.5      # minimal ratio between the energy emitted by the VCSEL and the incident energy on the holo
 holo_efficiency_mini = 0.7                  # minimal holo efficiency (ratio energy in ROI / total energy in image plane) 
 
-        ########## Constraints from hardware #############
+                         ########## Constraints from hardware #############
         
 wavelength = 850e-9             # [m] wavelength - VSCEL: VC850S-SMD
 divergence = 16                 # [°] gaussian beam divergence (full angle) - VSCEL: VC850S-SMD
 fringe_length_mini = 2e-6       # [m] fabrication constaint minimal width of the fringes at the edges of the fresnel lens
 optic_pp = 750e-9               # [m] pixel pitch on optic plane, imposed by the fabrication process
 
-#%%
-
-        ################# Consequences ####################
+                         ################# Consequences ####################
 
 # Fresnel lens focal length
 [f, diff] = getFocalLength(d1, d2, wavelength, divergence) # focal length for source - image plane conjugation
@@ -77,7 +73,7 @@ optic_length_maxi = getOpticSideLengthMaxi(wavelength, f, fringe_length_mini)
 w_z = getGaussianBeamRadius(wavelength=wavelength, divergence=divergence, propagation_distance=d1)
 optic_length_mini = getCollectorLengthMini(w_z=w_z, efficiency=light_collection_efficiency_mini)
 
-        ################### Arbitrage #######################
+                         ################### Arbitrage #######################
 
 optic_length = 1.1*optic_length_mini
 holo_length = optic_length/n_replication                 # [m] hologram side length. Will be replicated n_replication * n_replication times 
@@ -92,7 +88,7 @@ image_pp = wavelength * d2 * 1/holo_length               # [m] pixel pitch in im
 target_size = int(target_length//image_pp)               # [px] image size
 width = int(target_width//image_pp)                      # [px] image size
 
-# 8<--------------------- main -------------------------------------------
+#%% 8<--------------------------------------- main -------------------------------------------
 
 # target definition
 target = cross(cross_size=target_size, width=width, support_size = [target_size+10,target_size+10])
@@ -111,7 +107,7 @@ phase_lens = lens(f, wavelength=wavelength, sizeSupport=holo_size, samplingStep=
 phase_holo_lens = phase_holo + phase_lens
 phase_holo_lens_discretized = discretization(phase_holo+phase_lens, n_levels)
 
-#%% 8<-------------------- results -----------------------------------------
+#%% 8<----------------------------------- results -----------------------------------------
 
 np.save(dir_results+"crossholo", phase_holo)
 np.save(dir_results+"crossholoLens", phase_holo_lens)
@@ -163,7 +159,7 @@ with open(dir_results+'params.txt', 'w') as file:
     for k in range(len(params)):        
             file.write("\t" + params[k] + " : " + elts[k] + "\n")
 
-#%% 8<-------------------- plots in physical units ------------------------
+#%% 8<------------------------ ----- plots in physical units ------------------------------------
 
 [X,Y] = getCartesianCoordinates(nrows=holo_size[0])
 x_axis_image_plane = image_pp * X[0,:]                    # [m]
@@ -184,7 +180,7 @@ axs2[0,0].set_title("target")
 axs2[0,0].set_xlabel("[cm]")
 axs2[0,0].set_ylabel("[cm]")
 
-fig201=axs2[0,1].imshow(phase_holo, extent=                                    # [µm]
+fig201=axs2[0,1].imshow(phase_holo, extent=                                   # [µm]
                         1e6*np.array([x_axis_holo_plane[0], x_axis_holo_plane[-1], 
                                       y_axis_holo_plane[-1], y_axis_holo_plane[0]]))
 axs2[0,1].set_title("phase_holo ("+str(n_levels)+" levels)")
@@ -214,7 +210,7 @@ divider = make_axes_locatable(axs2[1,0])
 cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(fig210, cax=cax)
 
-fig211=axs2[1,1].imshow(phase_holo_lens, extent=                               # [µm]
+fig211=axs2[1,1].imshow(phase_holo_lens, extent=                              # [µm]
                         1e6*np.array([x_axis_holo_plane[0], x_axis_holo_plane[-1], 
                                       y_axis_holo_plane[-1], y_axis_holo_plane[0]]))
 axs2[1,1].set_title("phase_holo_lens ("+str(n_levels)+" levels)")
@@ -224,7 +220,7 @@ divider = make_axes_locatable(axs2[1,1])
 cax = divider.append_axes("right", size="5%", pad=0.05)
 plt.colorbar(fig211, cax=cax)
 
-fig212=axs2[1,2].imshow(phase_holo_lens_discretized, extent=                   # [µm]
+fig212=axs2[1,2].imshow(phase_holo_lens_discretized, extent=                  # [µm]
                         1e6*np.array([x_axis_holo_plane[0], x_axis_holo_plane[-1], 
                                       y_axis_holo_plane[-1], y_axis_holo_plane[0]]))
 axs2[1,2].set_title("phase_holo_lens_discretized")
