@@ -21,10 +21,10 @@ dir_results = dirc + r"results\\"
 
 #%% 8<-------------------------------------- Import modules -----------------------------------
 
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-
 import numpy as np
 import matplotlib.pyplot as plt
+
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from doe.paterns import cross
 
