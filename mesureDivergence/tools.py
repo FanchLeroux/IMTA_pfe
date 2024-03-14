@@ -124,4 +124,12 @@ def circAverage(img, origin = None, samplingStep = 1, binning = 1):
         circular_average[index] = np.mean(values)
         index += 1
     
-    return circular_average
+    return circular_average, origin
+
+def Gaussian(x, sigma):
+    y = np.exp(-1*x**2/(2*sigma**2))
+    return y
+
+
+
+
