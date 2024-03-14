@@ -52,8 +52,8 @@ average_frame_z1 = np.sum(frames_array_z1, axis=0)
 average_frame_z2 = np.sum(frames_array_z2, axis=0)
 
 # compute circular average
-circular_average_z1, origin_z1 = circAverage(average_frame_z1)
-circular_average_z2, origin_z2 = circAverage(average_frame_z2)
+circular_average_z1, origin_z1 = circAverage(average_frame_z1, binning=30)
+circular_average_z2, origin_z2 = circAverage(average_frame_z2, binning=30)
 
 # Keep only relevant part
 circular_average_z1 = circular_average_z1[:500]
@@ -63,34 +63,37 @@ circular_average_z2 = circular_average_z2[:500]
 circular_average_z1 = circular_average_z1/np.max(circular_average_z1)
 circular_average_z2 = circular_average_z2/np.max(circular_average_z2)
 
-#%% compute FWHM
+#%% FWHM method
 
-fwhm_z1 = 2*np.where(np.abs(circular_average_z1-0.5) ==                         # [m] full width at half maximum
+# find FWHM
+fwhm_z1 = 2*np.where(np.abs(circular_average_z1-0.5) ==                          # [m] full width at half maximum
                      np.min(np.abs(circular_average_z1-0.5)))[0][0] * camera_pp
 fwhm_z2 = 2*np.where(np.abs(circular_average_z2-0.5) == 
-                     np.min(np.abs(circular_average_z2-0.5)))[0][0] * camera_pp # [m] full width at half maximum
+                     np.min(np.abs(circular_average_z2-0.5)))[0][0] * camera_pp  # [m] full width at half maximum
 
-# compute waist (half width at 1/e^2 of the max irradiance)
+# compute waist (half width at 1/e^2 of the max irradiance) from FWHM
 waist_z1 = fwhm_z1/(2*np.log(2))**0.5 # [m]
 waist_z2 = fwhm_z2/(2*np.log(2))**0.5 # [m]
 
 # compute divergence (full angle) from FWHM
-divergence = 2*np.arctan((waist_z2-waist_z1)/delta_z)
-divergence = 180/np.pi * divergence
+divergence = 2*np.arctan((waist_z2-waist_z1)/delta_z) # [rad]
+divergence = 180/np.pi * divergence                   # [deg]
 
-#%% Gaussian fitting as in https://education.molssi.org/python-data-analysis/03-data-fitting/index.html
+#%% Gaussian fitting method
+
+# get gaussian fit std
 parameters_z1, _ = curve_fit(Gaussian, np.arange(len(circular_average_z1)), circular_average_z1)
 fit_sigma_z1 = parameters_z1[0]
-
 parameters_z2, _ = curve_fit(Gaussian, np.arange(len(circular_average_z2)), circular_average_z2)
 fit_sigma_z2 = parameters_z2[0]
 
+# compute waist from std
 waist_fit_z1 = 2*fit_sigma_z1*camera_pp
 waist_fit_z2 = 2*fit_sigma_z2*camera_pp
 
-# compute divergence (full angle) from gaussian fitting
-divergence_fit = 2*np.arctan((waist_fit_z2-waist_fit_z1)/delta_z)
-divergence_fit = 180/np.pi * divergence_fit
+# compute divergence (full angle) from waist in z1 and z_2
+divergence_fit = 2*np.arctan((waist_fit_z2-waist_fit_z1)/delta_z) # [rad]
+divergence_fit = 180/np.pi * divergence_fit                       # [deg]
 
 # compute fitted values
 fit_z1 = Gaussian(np.arange(len(circular_average_z1)), fit_sigma_z1)

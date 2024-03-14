@@ -112,14 +112,15 @@ def circAverage(img, origin = None, samplingStep = 1, binning = 1):
     Y = Y - origin[1] # offset to place the (0,0) point at the origin
     radial_coordinates = (X**2 + Y **2)**0.5 # [px] radial coordinates, center = origin
 
-    rad = np.arange(0, np.max(radial_coordinates), 1) # abscisse
+    rad = np.arange(1, np.max(radial_coordinates)) # abscisse. start at 1 because of binning behaviour
     
     circular_average = np.zeros(len(rad))
     index = 0
     
     for i in rad:
-        mask = (np.greater_equal(radial_coordinates, i) & 
-                np.less_equal(radial_coordinates, i + binning)) # take into account values between i and i + binning  
+        mask = (np.greater_equal(radial_coordinates, i - binning) & 
+                np.less_equal(radial_coordinates, i + binning)) # take into account values 
+                                                                # between i - binning and i + binning  
         values = img[mask]
         circular_average[index] = np.mean(values)
         index += 1
