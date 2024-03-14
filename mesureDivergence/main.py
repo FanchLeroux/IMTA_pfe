@@ -52,8 +52,8 @@ average_frame_z1 = np.sum(frames_array_z1, axis=0)
 average_frame_z2 = np.sum(frames_array_z2, axis=0)
 
 # compute circular average
-circular_average_z1, origin_z1 = circAverage(average_frame_z1, binning=30)
-circular_average_z2, origin_z2 = circAverage(average_frame_z2, binning=30)
+circular_average_z1, origin_z1 = circAverage(average_frame_z1, binning=1)
+circular_average_z2, origin_z2 = circAverage(average_frame_z2, binning=1)
 
 # Keep only relevant part
 circular_average_z1 = circular_average_z1[:500]
