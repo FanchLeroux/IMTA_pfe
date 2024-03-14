@@ -1,5 +1,13 @@
-ifta/fromKevin/
-ifta/patern/outputs/
+doe/fromKevin/
+
+doe/results/
 
 doe/__pycache__/
-doe/__pycache__/gaussianBeams.cpython-311.pyc
+
+doe/figures/
+
+metalenses/figures
+
+mesureDivergence/data/
+
+mesureDivergence/results/
