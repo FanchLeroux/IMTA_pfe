@@ -16,8 +16,8 @@ sys.path.append(path)
 #%% 8<------------------------------ Directories and filenames --------------------------------
 
 dirc = os.path.abspath(os.getcwd()) + r"\\"   # dirc = 'D:\\francoisLeroux\\codes\\mesureDivergence\\\\'
-filename_z1 = dirc + r"data\z1_0_20240314_10h23min.avi"
-filename_z2 = dirc + r"data\z2_0_20240314_10h28min.avi"
+filename_z1 = dirc + r"data\z1_3_20240314_17h20min.avi"
+filename_z2 = dirc + r"data\z2_3_20240314_17h17min.avi"
 dir_results = dirc + r"results\\"
 
 #%% 8<-------------------------------------- Import modules -----------------------------------
@@ -32,7 +32,8 @@ from mesureDivergence.tools import getFrames, circAverage, Gaussian
 #%% 8<-------------------------------------- parameters ----------------------------------------
 
 camera_pp = 5.3e-6 # [m] camera pixel pitch (uEye UI-1240LE-M-GL)
-delta_z = 0.01 # [m] z2 - z1 : distance between the two measurements
+delta_z = 0.01     # [m] z2 - z1 : distance between the two measurements
+binning = 5        # binning parameter for circular average computation
 
 #%% 8<----------------------------------------- main -------------------------------------------
 
@@ -52,12 +53,12 @@ average_frame_z1 = np.sum(frames_array_z1, axis=0)
 average_frame_z2 = np.sum(frames_array_z2, axis=0)
 
 # compute circular average
-circular_average_z1, origin_z1 = circAverage(average_frame_z1, binning=1)
-circular_average_z2, origin_z2 = circAverage(average_frame_z2, binning=1)
+circular_average_z1, origin_z1 = circAverage(average_frame_z1, binning=binning)
+circular_average_z2, origin_z2 = circAverage(average_frame_z2, binning=binning)
 
 # Keep only relevant part
-circular_average_z1 = circular_average_z1[:500]
-circular_average_z2 = circular_average_z2[:500]
+circular_average_z1 = circular_average_z1[:400]
+circular_average_z2 = circular_average_z2[:400]
 
 # Normalize max =1
 circular_average_z1 = circular_average_z1/np.max(circular_average_z1)
@@ -76,8 +77,8 @@ waist_z1 = fwhm_z1/(2*np.log(2))**0.5 # [m]
 waist_z2 = fwhm_z2/(2*np.log(2))**0.5 # [m]
 
 # compute divergence (full angle) from FWHM
-divergence = 2*np.arctan((waist_z2-waist_z1)/delta_z) # [rad]
-divergence = 180/np.pi * divergence                   # [deg]
+divergence_fwhm = 2*np.arctan((waist_z2-waist_z1)/delta_z) # [rad]
+divergence_fwhm = 180/np.pi * divergence_fwhm                   # [deg]
 
 #%% Gaussian fitting method
 
@@ -101,7 +102,7 @@ fit_z2 = Gaussian(np.arange(len(circular_average_z2)), fit_sigma_z2)
 
 #%% 8<-------------------------------------- results -------------------------------------------
 
-print("\ndivergence : " + str(np.round(divergence, decimals=2)) + " °")
+print("\ndivergence_fwhm : " + str(np.round(divergence_fwhm, decimals=2)) + " °")
 print("divergence_fit : " + str(np.round(divergence_fit, decimals=2)) + " °")
 
 #%% 8<--------------------------------------- plots --------------------------------------------
