@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Mar 12 10:19:24 2024
+Created on Tue Mar 12 10:19:24 2024 under Python 3.11.7
+
+Goal : mesure the divergence (full angle at 1/e^2 of the maximum irradiance) of the VCSEL VC850S-SMD
+       from the ROITHNER company
+       Camera : uEye UI-1240LE-M-GL
 
 @author: f24lerou
 """
@@ -34,9 +38,9 @@ from mesureDivergence.tools import getFrames, circAverage, Gaussian
 #% 8<-------------------------------------- parameters ----------------------------------------
 
 camera_pp = 0.009/1115 # [m] camera pixel pitch (uEye UI-1240LE-M-GL) migth account for magnification of the objective 
-                      # when measuring with a screen
-delta_z = 0.01        # [m] z2 - z1 : distance between the two measurements
-binning = 2           # binning parameter for circular average computation
+                       # when measuring with a screen
+delta_z = 0.01         # [m] z2 - z1 : distance between the two measurements
+binning = 3            # binning parameter for circular average computation
 
 #% 8<----------------------------------------- main -------------------------------------------
 
@@ -80,8 +84,8 @@ circular_average_z1, origin_z1 = circAverage(average_frame_z1, binning=binning)
 circular_average_z2, origin_z2 = circAverage(average_frame_z2, binning=binning)
 
 # Keep only relevant part
-circular_average_z1 = circular_average_z1[:100]
-circular_average_z2 = circular_average_z2[:400]
+circular_average_z1 = circular_average_z1[:80]
+circular_average_z2 = circular_average_z2[:200]
 
 # Normalize max = 1
 circular_average_z1 = circular_average_z1/np.max(circular_average_z1)
@@ -131,14 +135,22 @@ print("divergence_fit : " + str(np.round(divergence_fit, decimals=2)) + " °")
 #%% 8<--------------------------------------- plots --------------------------------------------
 
 fig1, axs1 = plt.subplots(nrows=2, ncols=2)
-axs1[0,0].plot(circular_average_z1, 'b')
-axs1[0,0].plot(circular_average_z2,'r')
-axs1[0,1].plot(fit_z1, 'b')
-axs1[0,1].plot(fit_z2, 'r')
-axs1[1,0].plot(circular_average_z1, '+b')
-axs1[1,0].plot(fit_z1, 'b')
-axs1[1,1].plot(circular_average_z2, '+r')
-axs1[1,1].plot(fit_z2, 'r')
+plot_circular_average_z1, = axs1[0,0].plot(circular_average_z1, 'b', label='measure z1')
+plot_circular_average_z2, = axs1[0,0].plot(circular_average_z2,'r', label='measure z1 + 1cm')
+axs1[0,0].legend(handles=[plot_circular_average_z1, plot_circular_average_z2])
+axs1[0,0].set_title("Measures")
+plot_fit_z1, = axs1[0,1].plot(fit_z1, 'b', label='fit z1')
+plot_fit_z2, = axs1[0,1].plot(fit_z2, 'r', label='fit z1 + 1cm')
+axs1[0,1].legend(handles = [plot_fit_z1, plot_fit_z2])
+axs1[0,1].set_title("Fitting")
+plot_circular_average_z1, = axs1[1,0].plot(circular_average_z1, '+b', label='data points z1')
+plot_fit_z1, = axs1[1,0].plot(fit_z1, 'b', label='Gaussian fitting')
+axs1[1,0].legend(handles=[plot_circular_average_z1, plot_fit_z1])
+axs1[1,0].set_title("Measures and fitting at z1")
+plot_circular_average_z2, = axs1[1,1].plot(circular_average_z2, '+r', label='data points z2')
+plot_fit_z2, = axs1[1,1].plot(fit_z2, 'r', label='Gaussian fitting')
+axs1[1,1].legend(handles=[plot_circular_average_z2, plot_fit_z2])
+axs1[1,1].set_title("Measures and fitting at z1 + 1cm")
 
 fig2, axs2 = plt.subplots(nrows=1, ncols=2)
 axs2[0].imshow(average_frame_z1)
