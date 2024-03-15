@@ -31,9 +31,10 @@ from mesureDivergence.tools import getFrames, circAverage, Gaussian
 
 #%% 8<-------------------------------------- parameters ----------------------------------------
 
-camera_pp = 5.3e-6 # [m] camera pixel pitch (uEye UI-1240LE-M-GL)
-delta_z = 0.01     # [m] z2 - z1 : distance between the two measurements
-binning = 5        # binning parameter for circular average computation
+camera_pp = 0.005/613 # [m] camera pixel pitch (uEye UI-1240LE-M-GL) migth account for magnification of the objective 
+                      # when measuring with a screen
+delta_z = 0.01        # [m] z2 - z1 : distance between the two measurements
+binning = 1           # binning parameter for circular average computation
 
 #%% 8<----------------------------------------- main -------------------------------------------
 
@@ -57,7 +58,7 @@ circular_average_z1, origin_z1 = circAverage(average_frame_z1, binning=binning)
 circular_average_z2, origin_z2 = circAverage(average_frame_z2, binning=binning)
 
 # Keep only relevant part
-circular_average_z1 = circular_average_z1[:400]
+circular_average_z1 = circular_average_z1[:20]
 circular_average_z2 = circular_average_z2[:400]
 
 # Normalize max =1
