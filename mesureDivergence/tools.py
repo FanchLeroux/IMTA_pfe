@@ -67,7 +67,7 @@ def getFrames(filename):
     frames_array = np.array(frames_list)
     frames_array = frames_array[:,:,:,0]     # monochrome but still 3 identical values returned per pixel. Keep only one
         
-    return frames_array
+    return np.asarray(frames_array, dtype = float)
 
 
 def circAverage(img, origin = None, samplingStep = 1, binning = 1):

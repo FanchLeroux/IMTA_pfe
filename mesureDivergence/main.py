@@ -16,8 +16,10 @@ sys.path.append(path)
 #%% 8<------------------------------ Directories and filenames --------------------------------
 
 dirc = os.path.abspath(os.getcwd()) + r"\\"   # dirc = 'D:\\francoisLeroux\\codes\\mesureDivergence\\\\'
-filename_z1 = dirc + r"data\z1_3_20240314_17h20min.avi"
-filename_z2 = dirc + r"data\z2_3_20240314_17h17min.avi"
+filename_darks_z1 = dirc + r"data\z1_3_20240314_17h20min.avi"
+filename_darks_z2 = dirc + r"data\z2_3_20240314_17h17min.avi"
+filename_frames_z1 = dirc + r"data\z1_3_20240314_17h20min.avi"
+filename_frames_z2 = dirc + r"data\z2_3_20240314_17h17min.avi"
 dir_results = dirc + r"results\\"
 
 #%% 8<-------------------------------------- Import modules -----------------------------------
@@ -38,9 +40,13 @@ binning = 1           # binning parameter for circular average computation
 
 #%% 8<----------------------------------------- main -------------------------------------------
 
+# get darks from .avi file
+darks_array_z1 = getFrames(filename_darks_z1)
+darks_array_z2 = getFrames(filename_darks_z2)
+
 # get frames from .avi file
-frames_array_z1 = getFrames(filename_z1)
-frames_array_z2 = getFrames(filename_z2)
+frames_array_z1 = getFrames(filename_frames_z1)
+frames_array_z2 = getFrames(filename_frames_z2)
 
 # check the data is not saturated
 max_frames_array_z1 = np.max(frames_array_z1)
@@ -49,9 +55,23 @@ max_frames_array_z2 = np.max(frames_array_z2)
 if max_frames_array_z1 >= 255 or max_frames_array_z2 >= 255:
     print("WARNING : Data is saturated")
 
+# get average dark
+average_dark_z1 = np.sum(darks_array_z1, axis=0)
+average_dark_z2 = np.sum(darks_array_z2, axis=0)
+
 # get average frame
 average_frame_z1 = np.sum(frames_array_z1, axis=0)
 average_frame_z2 = np.sum(frames_array_z2, axis=0)
+
+# substract the dark and force negatives values to 0
+average_frame_z1 = average_frame_z1 - average_dark_z1
+average_frame_z1[average_frame_z1<0] = 0.0
+average_frame_z2 = average_frame_z2 - average_dark_z2
+average_frame_z2[average_frame_z2<0] = 0.0
+
+# normalization in energy (sum = 1) (superflu)
+average_frame_z1 = average_frame_z1/np.sum(average_frame_z1)
+average_frame_z2 = average_frame_z2/np.sum(average_frame_z2)
 
 # compute circular average
 circular_average_z1, origin_z1 = circAverage(average_frame_z1, binning=binning)
@@ -61,7 +81,7 @@ circular_average_z2, origin_z2 = circAverage(average_frame_z2, binning=binning)
 circular_average_z1 = circular_average_z1[:20]
 circular_average_z2 = circular_average_z2[:400]
 
-# Normalize max =1
+# Normalize max = 1
 circular_average_z1 = circular_average_z1/np.max(circular_average_z1)
 circular_average_z2 = circular_average_z2/np.max(circular_average_z2)
 
