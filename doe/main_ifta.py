@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from doe.paterns import cross
+from doe.paterns import cross, gridSquares
 
 from doe.phaseScreens import lens, getOpticSideLengthMaxi
 
@@ -57,8 +57,9 @@ holo_efficiency_mini = 0.7                  # minimal holo efficiency (ratio ene
                          ########## Constraints from hardware #############
         
 wavelength = 850e-9             # [m] wavelength - VSCEL: VC850S-SMD
-divergence = 16                 # [°] gaussian beam divergence (full angle) - VSCEL: VC850S-SMD
-fringe_length_mini = 2e-6       # [m] fabrication constaint minimal width of the fringes at the edges of the fresnel lens
+divergence = 10                 # [°] gaussian beam divergence (full angle) - VSCEL: VC850S-SMD
+fringe_length_mini = 2e-6       # [m] fabrication constaint : minimal width of the fringes at the edges of the
+                                # fresnel lens (half a period)
 optic_pp = 750e-9               # [m] pixel pitch on optic plane, imposed by the fabrication process
 
                          ################# Consequences ####################
@@ -76,7 +77,8 @@ optic_length_mini = getCollectorLengthMini(w_z=w_z, efficiency=light_collection_
                          ################### Arbitrage #######################
 
 optic_length = 1.1*optic_length_mini
-holo_length = optic_length/n_replication                 # [m] hologram side length. Will be replicated n_replication * n_replication times 
+holo_length = optic_length/n_replication                 # [m] hologram side length. Will be replicated
+                                                         # n_replication * n_replication times 
 holo_size = int(holo_length//optic_pp)                   # [px] hologram size
 holo_size = [holo_size + holo_size%2]*2                  # [px] hologram size (even)
 holo_length = holo_size[0] * optic_pp                    # [m] hologram side length after sampling
@@ -91,7 +93,8 @@ width = int(target_width//image_pp)                      # [px] image size
 #%% 8<--------------------------------------- main -------------------------------------------
 
 # target definition
-target = cross(cross_size=target_size, width=width, support_size = [target_size+10,target_size+10])
+#target = cross(cross_size=target_size, width=width, support_size = [target_size+10,target_size+10]) # cross
+target = gridSquares(nPointsX = 3, spacing=target_size//5, width=target_size//5)
 
 # ifta - no soft quantization
 phase_holo, recovery, efficiency = ifta(target, holo_size, n_levels=n_levels, compute_efficiency=1, 
