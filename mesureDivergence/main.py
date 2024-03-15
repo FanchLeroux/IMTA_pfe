@@ -13,16 +13,16 @@ import sys
 path = os.path.abspath(os.path.abspath('..')) # path = 'D:\\francoisLeroux\\codes'
 sys.path.append(path)
 
-#%% 8<------------------------------ Directories and filenames --------------------------------
+#% 8<------------------------------ Directories and filenames --------------------------------
 
 dirc = os.path.abspath(os.getcwd()) + r"\\"   # dirc = 'D:\\francoisLeroux\\codes\\mesureDivergence\\\\'
-filename_darks_z1 = dirc + r"data\z1_3_20240314_17h20min.avi"
-filename_darks_z2 = dirc + r"data\z2_3_20240314_17h17min.avi"
-filename_frames_z1 = dirc + r"data\z1_3_20240314_17h20min.avi"
-filename_frames_z2 = dirc + r"data\z2_3_20240314_17h17min.avi"
+filename_darks_z1 = dirc + r"data\dark_z1_4_20240315_10h57min.avi"
+filename_darks_z2 = dirc + r"data\dark_z2_4_20240315_11h01min.avi"
+filename_frames_z1 = dirc + r"data\z1_4_20240315_10h50min.avi"
+filename_frames_z2 = dirc + r"data\z2_4_20240315_10h58min.avi"
 dir_results = dirc + r"results\\"
 
-#%% 8<-------------------------------------- Import modules -----------------------------------
+#% 8<-------------------------------------- Import modules -----------------------------------
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -31,18 +31,14 @@ from scipy.optimize import curve_fit
 
 from mesureDivergence.tools import getFrames, circAverage, Gaussian
 
-#%% 8<-------------------------------------- parameters ----------------------------------------
+#% 8<-------------------------------------- parameters ----------------------------------------
 
-camera_pp = 0.005/613 # [m] camera pixel pitch (uEye UI-1240LE-M-GL) migth account for magnification of the objective 
+camera_pp = 0.009/1115 # [m] camera pixel pitch (uEye UI-1240LE-M-GL) migth account for magnification of the objective 
                       # when measuring with a screen
 delta_z = 0.01        # [m] z2 - z1 : distance between the two measurements
-binning = 1           # binning parameter for circular average computation
+binning = 2           # binning parameter for circular average computation
 
-#%% 8<----------------------------------------- main -------------------------------------------
-
-# get darks from .avi file
-darks_array_z1 = getFrames(filename_darks_z1)
-darks_array_z2 = getFrames(filename_darks_z2)
+#% 8<----------------------------------------- main -------------------------------------------
 
 # get frames from .avi file
 frames_array_z1 = getFrames(filename_frames_z1)
@@ -54,6 +50,12 @@ max_frames_array_z2 = np.max(frames_array_z2)
 
 if max_frames_array_z1 >= 255 or max_frames_array_z2 >= 255:
     print("WARNING : Data is saturated")
+
+#%%
+
+# get darks from .avi file
+darks_array_z1 = getFrames(filename_darks_z1)
+darks_array_z2 = getFrames(filename_darks_z2)
 
 # get average dark
 average_dark_z1 = np.sum(darks_array_z1, axis=0)
@@ -78,7 +80,7 @@ circular_average_z1, origin_z1 = circAverage(average_frame_z1, binning=binning)
 circular_average_z2, origin_z2 = circAverage(average_frame_z2, binning=binning)
 
 # Keep only relevant part
-circular_average_z1 = circular_average_z1[:20]
+circular_average_z1 = circular_average_z1[:100]
 circular_average_z2 = circular_average_z2[:400]
 
 # Normalize max = 1
@@ -128,15 +130,20 @@ print("divergence_fit : " + str(np.round(divergence_fit, decimals=2)) + " °")
 
 #%% 8<--------------------------------------- plots --------------------------------------------
 
-fig, axs = plt.subplots(nrows=2, ncols=2)
-axs[0,0].plot(circular_average_z1, 'b')
-axs[0,0].plot(circular_average_z2,'r')
-axs[0,1].plot(fit_z1, 'b')
-axs[0,1].plot(fit_z2, 'r')
-axs[1,0].plot(circular_average_z1, '+b')
-axs[1,0].plot(fit_z1, 'b')
-axs[1,1].plot(circular_average_z2, '+r')
-axs[1,1].plot(fit_z2, 'r')
+fig1, axs1 = plt.subplots(nrows=2, ncols=2)
+axs1[0,0].plot(circular_average_z1, 'b')
+axs1[0,0].plot(circular_average_z2,'r')
+axs1[0,1].plot(fit_z1, 'b')
+axs1[0,1].plot(fit_z2, 'r')
+axs1[1,0].plot(circular_average_z1, '+b')
+axs1[1,0].plot(fit_z1, 'b')
+axs1[1,1].plot(circular_average_z2, '+r')
+axs1[1,1].plot(fit_z2, 'r')
 
+fig2, axs2 = plt.subplots(nrows=1, ncols=2)
+axs2[0].imshow(average_frame_z1)
+axs2[0].set_title("spot at distance z1")
+axs2[1].imshow(average_frame_z2)
+axs2[1].set_title("spot at distance z1 + 1 cm")
 
 
