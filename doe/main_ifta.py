@@ -41,7 +41,7 @@ from doe.ifta import ifta, iftaSoftQuantization
 # geometry        
 d1 = 0.01                                   # [m] distance laser object waist - holo
 d2 = 0.03                                   # [m] distance holo - image plane (image waist)
-target_length = 0.01                        # [m] target side length
+target_length = 0.015                       # [m] target side length
 target_width = target_length/5              # [m] target width
 
 # number of phase levels
@@ -73,6 +73,9 @@ optic_length_maxi = getOpticSideLengthMaxi(wavelength, f, fringe_length_mini)
 # optic side length mini for light collection requierment
 w_z = getGaussianBeamRadius(wavelength=wavelength, divergence=divergence, propagation_distance=d1)
 optic_length_mini = getCollectorLengthMini(w_z=w_z, efficiency=light_collection_efficiency_mini)
+
+# target length maxi to avoid isolated pixels on doe
+target_length_maxi = wavelength*d2/(2*optic_pp) # [m] delta_f max = 1/direct_space_pp
 
                          ################### Arbitrage #######################
 
@@ -120,41 +123,43 @@ np.save(dir_results+"crossholoLens", phase_holo_lens)
 params = ["light collection requierment",
           "wavelength [nm]", 
           "d1 [cm]", 
-          "d2 [cm]", 
-          "hologram side length [µm]", 
-          
-          "hologram diameter [px]",          
-          "number of replication in X and Y",
-          "optic side length [µm]",
-          "optic side length mini (light collection requierment) [µm]",
-          "optic side length maxi (thin fringes requierments) [µm]",
-          
-          "optic pixel pitch [nm]",
-          "target image diameter [mm]",
+          "d2 [cm]",
           "focal length [mm]",         
-          "relative difference between thin lens formula \n\tand modified thin lens formula",
-          "hologram efficiency - no soft quantization",
           
+          "relative difference between thin lens formula \n\tand modified thin lens formula",
+          "target image maxi to avoid isolated pixels [mm]",
+          "target image diameter [mm]",
+          "number of replication in X and Y",
+          "optic side length mini (light collection requierment) [µm]",
+          
+          "optic side length maxi (thin fringes requierments) [µm]",
+          "optic side length [µm]",
+          "optic pixel pitch [nm]",
+          "hologram side length [µm]",
+          "hologram diameter [px]",
+          
+          "hologram efficiency - no soft quantization",
           "hologram efficiency - with phase soft quantization"]
 
 elts = [str(light_collection_efficiency_mini) + "\n",
-        str(wavelength*1e9), 
+        str(wavelength*1e9) + "\n", 
         str(100*d1), 
-        str(100*d2) + "\n", 
-        str(np.round(holo_length*1e6, decimals=2)), 
-        
-        str(holo_size[0]) + "\n",
-        str(n_replication),
-        str(np.round(optic_length*1e6, decimals=1)),
-        str(np.round(optic_length_mini*1e6, decimals=1)),
-        str(np.round(optic_length_maxi*1e6, decimals=1)),
-        
-        str(np.round(optic_pp*1e9, decimals=1)) + "\n",
-        str(np.round(target_size*image_pp*1e3, decimals=2)) + "\n",
+        str(100*d2),
         str(np.round(f*1e3, decimals=1)),
-        str(np.round(diff/f, decimals=6)) + "\n",
-        str(np.round(efficiency, decimals=4)),
         
+        str(np.round(diff/f, decimals=6)) + "\n",
+        str(np.round(target_length_maxi*1e3, decimals=2)),
+        str(np.round(target_size*image_pp*1e3, decimals=2)) + "\n",
+        str(n_replication) + "\n",
+        str(np.round(optic_length_mini*1e6, decimals=1)),
+        
+        str(np.round(optic_length_maxi*1e6, decimals=1)),
+        str(np.round(optic_length*1e6, decimals=1)),        
+        str(np.round(optic_pp*1e9, decimals=1)) + "\n",
+        str(np.round(holo_length*1e6, decimals=2)),
+        str(holo_size[0]) + "\n",
+        
+        str(np.round(efficiency, decimals=4)),
         str(np.round(efficiency_soft, decimals=4))]
 
 with open(dir_results+'params.txt', 'w') as file:
