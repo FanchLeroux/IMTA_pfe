@@ -76,7 +76,8 @@ optic_length_maxi = getOpticSideLengthMaxi(wavelength, f, fringe_length_mini)
 light_collection_efficiency_maxi = gaussianEfficiency(wavelength, d1, optic_length_maxi/2, divergence=divergence)
 
 # target length maxi to avoid isolated pixels on doe
-target_length_maxi = wavelength*d2/(2*optic_pp) # [m] delta_f max = 1/direct_space_pp
+target_length_maxi = wavelength*d2/(2*optic_pp) # [m] delta_f max = 1/direct_space_pp. Division by
+                                                # two to avoid isolated pixels
 
                          ################### Arbitrage #######################
 
@@ -94,7 +95,7 @@ optic_length = n_replication * holo_length               # [m] optic side length
 
 light_collection_efficiency = gaussianEfficiency(wavelength, d1, optic_length/2, divergence=divergence)
 
-target_length = 0.9 * target_length_maxi    # [m] target side length
+target_length = 0.9 * target_length_maxi                 # [m] target side length
 
 image_pp = wavelength * d2 * 1/holo_length               # [m] pixel pitch in image plane
 
@@ -117,7 +118,6 @@ phase_holo_soft, recovery_soft, efficiency_soft = iftaSoftQuantization(target, h
 
 #%% Fresnel lens computation
 phase_lens = lens(f, wavelength=wavelength, sizeSupport=optic_size, samplingStep=optic_pp, n_levels=0)
-
 phase_holo_lens = phase_holo + phase_lens[:holo_size[0], :holo_size[1]] # adding top left corner of the fresnel lens
 phase_holo_lens_discretized = discretization(phase_holo_lens, n_levels)
 

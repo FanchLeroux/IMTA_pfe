@@ -72,6 +72,27 @@ def getCollectorLengthMini(w_z, efficiency):
         
     return float(length_mini)
 
+def divergenceToWaist(wavelength, divergence):
+    
+    """
+    divergenceToWaist :  compute the waist from the divergence
+                      
+    Author : Francois Leroux
+    Contact : francois.leroux.pro@gmail.com
+    Status : in progress
+    Last update : 2024.03.18, Brest
+    Comments : Source : https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=14511
+    
+    Inputs : MANDATORY :  wavelength {float}[m] : wavelength
+                          divergence {float}[°] : the laser divergence (full angle)
+                                 
+    Outputs : w_0 {float}[m] : object waist
+    """
+    
+    w_0 = wavelength/(np.pi * np.tan(np.pi/180 * divergence/2))
+    
+    return w_0
+
 def getFocalLength(d1, d2, wavelength, divergence):
 
 #8<-------------------------------------------------------------------------------------------------------
@@ -83,7 +104,7 @@ def getFocalLength(d1, d2, wavelength, divergence):
 # Contact : francois.leroux.pro@gmail.com
 # Status : in progress
 # Last update : 2024.03.11, Brest
-# Comments : modified thin lens equation : https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=14511 
+# Comments : modified thin lens equation : https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=14511
 #            WARNING : can return negative values   
 #
 # Inputs : MANDATORY : d1 {float}[m] : absolute distance object point - lens
@@ -112,6 +133,27 @@ def getFocalLength(d1, d2, wavelength, divergence):
     
     return f_modified_thin_lens_formula, diff
 
+def getImageWaist(wavelength, f, w_0, d1):
+
+    """
+    getFocalLength :  compute the image waist from the object waist, the distance to the lens and the focal 
+                      
+    Author : Francois Leroux
+    Contact : francois.leroux.pro@gmail.com
+    Status : in progress
+    Last update : 2024.03.11, Brest
+    Comments : Source : https://www.thorlabs.com/newgrouppage9.cfm?objectgroup_id=14511 
+    
+    Inputs : MANDATORY :  wavelength {float}[m] : wavelength
+                          d1 {float}[m] : absolute distance object point - lens 
+                          w_0 {float}[m] : object waist
+                        
+    Outputs : w_0_prime {float}[m] : image waist
+    """
+
+    w_0_prime = w_0 * f / ((d1-f)**2 + (np.pi*w_0**2/wavelength)**2)**0.5
+
+    return w_0_prime
 
 def gaussianEfficiency(wavelength, distance, x_half_extent, **kargs):
     
