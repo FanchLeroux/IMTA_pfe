@@ -31,7 +31,7 @@ from doe.paterns import cross, gridSquares
 from doe.phaseScreens import lens, getOpticSideLengthMaxi
 
 from doe.tools import discretization, getCartesianCoordinates
-from doe.gaussianBeams import getGaussianBeamRadius, getCollectorLengthMini, getFocalLength
+from doe.gaussianBeams import getGaussianBeamRadius, getCollectorLengthMini, getFocalLength, gaussianEfficiency
 from doe.ifta import ifta, iftaSoftQuantization
 
 #%% 8<------------------------------------ Parameters ------------------------------------------
@@ -41,8 +41,6 @@ from doe.ifta import ifta, iftaSoftQuantization
 # geometry        
 d1 = 0.01                                   # [m] distance laser object waist - holo
 d2 = 0.03                                   # [m] distance holo - image plane (image waist)
-target_length = 0.015                       # [m] target side length
-target_width = target_length/5              # [m] target width
 
 # number of phase levels
 n_levels = 2
@@ -67,31 +65,41 @@ optic_pp = 750e-9               # [m] pixel pitch on optic plane, imposed by the
 # Fresnel lens focal length
 [f, diff] = getFocalLength(d1, d2, wavelength, divergence) # focal length for source - image plane conjugation
 
-# optic side length maxi for thin fringes requierment
-optic_length_maxi = getOpticSideLengthMaxi(wavelength, f, fringe_length_mini)
-
-# optic side length mini for light collection requierment
+# optic side length mini to match light collection requirement
 w_z = getGaussianBeamRadius(wavelength=wavelength, divergence=divergence, propagation_distance=d1)
 optic_length_mini = getCollectorLengthMini(w_z=w_z, efficiency=light_collection_efficiency_mini)
+
+# optic side length maxi to match thin fringes requirement
+optic_length_maxi = getOpticSideLengthMaxi(wavelength, f, fringe_length_mini)
+
+# light collection maxi
+light_collection_efficiency_maxi = gaussianEfficiency(wavelength, d1, optic_length_maxi/2, divergence=divergence)
 
 # target length maxi to avoid isolated pixels on doe
 target_length_maxi = wavelength*d2/(2*optic_pp) # [m] delta_f max = 1/direct_space_pp
 
                          ################### Arbitrage #######################
 
-optic_length = 1.1*optic_length_mini
+#optic_length = 1.1*optic_length_mini
+#optic_length = 0.9*optic_length_maxi
+optic_length = optic_length_mini + 0.5*(optic_length_maxi - optic_length_mini)
 holo_length = optic_length/n_replication                 # [m] hologram side length. Will be replicated
                                                          # n_replication * n_replication times 
 holo_size = int(holo_length//optic_pp)                   # [px] hologram size
-holo_size = [holo_size + holo_size%2]*2                  # [px] hologram size (even)
+holo_size = np.array([holo_size + holo_size%2]*2)                  # [px] hologram size (even)
 holo_length = holo_size[0] * optic_pp                    # [m] hologram side length after sampling
+optic_size = n_replication * holo_size                   # [px] optic size
 optic_length = n_replication * holo_length               # [m] optic side length after sampling
+
+
+light_collection_efficiency = gaussianEfficiency(wavelength, d1, optic_length/2, divergence=divergence)
+
+target_length = 0.9 * target_length_maxi    # [m] target side length
 
 image_pp = wavelength * d2 * 1/holo_length               # [m] pixel pitch in image plane
 
 # target image
 target_size = int(target_length//image_pp)               # [px] image size
-width = int(target_width//image_pp)                      # [px] image size
 
 #%% 8<--------------------------------------- main -------------------------------------------
 
@@ -107,16 +115,16 @@ phase_holo, recovery, efficiency = ifta(target, holo_size, n_levels=n_levels, co
 phase_holo_soft, recovery_soft, efficiency_soft = iftaSoftQuantization(target, holo_size, n_levels=n_levels, 
                                                                       compute_efficiency=1, rfact=1.2, n_iter=100)
 
-# Fresnel lens computation
-phase_lens = lens(f, wavelength=wavelength, sizeSupport=holo_size, samplingStep=holo_length/holo_size[0], n_levels=0)
+#%% Fresnel lens computation
+phase_lens = lens(f, wavelength=wavelength, sizeSupport=optic_size, samplingStep=optic_pp, n_levels=0)
 
-phase_holo_lens = phase_holo + phase_lens
-phase_holo_lens_discretized = discretization(phase_holo+phase_lens, n_levels)
+phase_holo_lens = phase_holo + phase_lens[:holo_size[0], :holo_size[1]] # adding top left corner of the fresnel lens
+phase_holo_lens_discretized = discretization(phase_holo_lens, n_levels)
 
 #%% 8<----------------------------------- results -----------------------------------------
 
-np.save(dir_results+"crossholo", phase_holo)
-np.save(dir_results+"crossholoLens", phase_holo_lens)
+np.save(dir_results+"holo", phase_holo)
+np.save(dir_results+"holoLens", phase_holo_lens)
 
 #%% 8<------------------------------- param text file --------------------------------------
 
@@ -127,17 +135,19 @@ params = ["light collection requierment",
           "focal length [mm]",         
           
           "relative difference between thin lens formula \n\tand modified thin lens formula",
-          "target image maxi to avoid isolated pixels [mm]",
+          "target image diameter maxi to avoid isolated pixels [mm]",
           "target image diameter [mm]",
           "number of replication in X and Y",
           "optic side length mini (light collection requierment) [µm]",
           
           "optic side length maxi (thin fringes requierments) [µm]",
+          "light collection efficiency maxi",
           "optic side length [µm]",
           "optic pixel pitch [nm]",
           "hologram side length [µm]",
-          "hologram diameter [px]",
           
+          "hologram diameter [px]",
+          "light collection efficiency",
           "hologram efficiency - no soft quantization",
           "hologram efficiency - with phase soft quantization"]
 
@@ -153,12 +163,14 @@ elts = [str(light_collection_efficiency_mini) + "\n",
         str(n_replication) + "\n",
         str(np.round(optic_length_mini*1e6, decimals=1)),
         
-        str(np.round(optic_length_maxi*1e6, decimals=1)),
+        str(np.round(optic_length_maxi*1e6, decimals=1)) + " => light collection efficiency maxi",
+        str(np.round(light_collection_efficiency_maxi, decimals=2)) + "\n",
         str(np.round(optic_length*1e6, decimals=1)),        
         str(np.round(optic_pp*1e9, decimals=1)) + "\n",
         str(np.round(holo_length*1e6, decimals=2)),
+    
         str(holo_size[0]) + "\n",
-        
+        str(np.round(light_collection_efficiency, decimals=2)) + "\n",
         str(np.round(efficiency, decimals=4)),
         str(np.round(efficiency_soft, decimals=4))]
 
@@ -221,7 +233,7 @@ plt.colorbar(fig210, cax=cax)
 fig211=axs2[1,1].imshow(phase_holo_lens, extent=                              # [µm]
                         1e6*np.array([x_axis_holo_plane[0], x_axis_holo_plane[-1], 
                                       y_axis_holo_plane[-1], y_axis_holo_plane[0]]))
-axs2[1,1].set_title("phase_holo_lens ("+str(n_levels)+" levels)")
+axs2[1,1].set_title("phase_holo + top left corner of phase lens")
 axs2[1,1].set_xlabel("[µm]")
 axs2[1,1].set_ylabel("[µm]")
 divider = make_axes_locatable(axs2[1,1])
