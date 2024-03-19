@@ -78,12 +78,14 @@ w_0_prime = getImageWaist(wavelength, f, w_0, d1)
 
 #%% choose optic_length
 
-optic_length_factor = 0.7
+optic_length_factor = 0.3
 optic_length = optic_length_mini + optic_length_factor*(optic_length_maxi - optic_length_mini)
 
 #%% 8<--------------------------------- Replication workflow --------------------------------------
 
-separation = 10e-6 #2*w_0_prime # [m] step of the Dirac comb in image plane, i.e separation between two samples dots
+n_points = 3
+
+separation = 100e-6 #2*w_0_prime # [m] step of the Dirac comb in image plane, i.e separation between two samples dots
 
 replication_step = wavelength * d2 / separation # [m] step of the Dirac comb in optic space, i.e separation
                                                 # between two replicated holograms, i.e hologram side length
@@ -96,16 +98,14 @@ target_suport = np.zeros(holo_size) # support of the target image
 
 target_pp = wavelength * d2 / replication_step # optic_length or replication_step at the denominator ?
 
-n_points = 6
-
 target_length = n_points*separation # [m]
 
 target_size = np.array([target_length//target_pp + np.ceil(target_length%target_pp)]*2, dtype=int)
 
-target_suport[target_suport.shape[0]//2:target_suport.shape[0]//2+target_size[0],
-              target_suport.shape[1]//2:target_suport.shape[1]//2+target_size[1]] = np.ones(target_size)
+target_suport[target_suport.shape[0]//2-target_size[0]//2:target_suport.shape[0]//2+target_size[0]//2+1,
+              target_suport.shape[1]//2-target_size[1]//2:target_suport.shape[1]//2+target_size[1]//2+1] = np.ones(target_size)
 
-phase_holo, recovery, efficiency = ifta(target_suport, target_suport.shape, n_levels=n_levels, compute_efficiency=1, 
+phase_holo, recovery, efficiency = iftaSoftQuantization(target_suport, target_suport.shape, n_levels=n_levels, compute_efficiency=1, 
                                        rfact=1.2, n_iter=100)
 
 
@@ -151,7 +151,7 @@ axs[0,0].imshow(phase_holo)
 axs[0,1].imshow(phase_holo_replicated)
 axs[1,0].imshow(image_holo_cropped)
 
-axs[1,1].imshow(image_holo_replicated_cropped**0.25, extent=                                   # [µm]
+axs[1,1].imshow(image_holo_replicated_cropped, extent=                                   # [µm]
                         1e6*np.array([x_axis[0], x_axis[-1], 
                                       y_axis[-1], y_axis[0]]))
 axs[1,1].set_xlabel("[µm]")
