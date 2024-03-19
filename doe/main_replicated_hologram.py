@@ -83,7 +83,7 @@ optic_length = optic_length_mini + optic_length_factor*(optic_length_maxi - opti
 
 #%% 8<--------------------------------- Replication workflow --------------------------------------
 
-separation = 50e-6 #2*w_0_prime # [m] step of the Dirac comb in image plane, i.e separation between two samples dots
+separation = 10e-6 #2*w_0_prime # [m] step of the Dirac comb in image plane, i.e separation between two samples dots
 
 replication_step = wavelength * d2 / separation # [m] step of the Dirac comb in optic space, i.e separation
                                                 # between two replicated holograms, i.e hologram side length
@@ -94,9 +94,11 @@ n_replications = int(optic_length//replication_step)
 
 target_suport = np.zeros(holo_size) # support of the target image
 
-target_pp = wavelength * d2 / replication_step
+target_pp = wavelength * d2 / replication_step # optic_length or replication_step at the denominator ?
 
-target_length = 3*separation # [m]
+n_points = 6
+
+target_length = n_points*separation # [m]
 
 target_size = np.array([target_length//target_pp + np.ceil(target_length%target_pp)]*2, dtype=int)
 
@@ -112,19 +114,18 @@ phase_holo_replicated = np.full(n_replications*holo_size, np.nan)
 
 for i in range(n_replications):
     for j in range(n_replications):
-        phase_holo_replicated[i*holo_size[0]:(i+1)*holo_size[0],
-                              j*holo_size[1]:(j+1)*holo_size[1]] = phase_holo
+            phase_holo_replicated[i*holo_size[0]:(i+1)*holo_size[0],
+                                  j*holo_size[1]:(j+1)*holo_size[1]] = phase_holo
 
 #%%
 
 image_pp = wavelength * d2 / optic_length # [m] pixel pitch on image plane
 
-#%%
 image_holo = np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phase_holo))))**2
 image_holo_replicated = np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phase_holo_replicated))))**2
 
-holo_window = 10
-holo_replicated_window = 50
+holo_window = 20
+holo_replicated_window = int((n_points+10)*separation//image_pp)
 
 image_holo_max = np.where(image_holo==np.max(image_holo))
 image_holo_cropped = image_holo[image_holo_max[0][0]-holo_window//2:image_holo_max[0][0]+holo_window//2, 
@@ -140,6 +141,7 @@ image_holo_replicated_cropped = image_holo_replicated[image_holo_replicated_max[
 
 # %%
 
+
 [X,Y] = getCartesianCoordinates(image_holo_cropped.shape[0])
 x_axis = image_pp * X[0,:]
 y_axis = image_pp * Y[:,0]
@@ -149,7 +151,7 @@ axs[0,0].imshow(phase_holo)
 axs[0,1].imshow(phase_holo_replicated)
 axs[1,0].imshow(image_holo_cropped)
 
-axs[1,1].imshow(image_holo_replicated_cropped, extent=                                   # [µm]
+axs[1,1].imshow(image_holo_replicated_cropped**0.25, extent=                                   # [µm]
                         1e6*np.array([x_axis[0], x_axis[-1], 
                                       y_axis[-1], y_axis[0]]))
 axs[1,1].set_xlabel("[µm]")
