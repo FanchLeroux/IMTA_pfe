@@ -28,15 +28,16 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from doe.paterns import cross, gridSquares
 
 from doe.phaseScreens import lens, getOpticSideLengthMaxi
+from doe.amplitudeScreens import Gaussian
 
-from doe.tools import discretization, getCartesianCoordinates
+from doe.tools import discretization, getCartesianCoordinates, ZerosPadding
 from doe.gaussianBeams import getGaussianBeamRadius, getCollectorLengthMini, getFocalLength, \
                               gaussianEfficiency, getImageWaist, divergenceToWaist
 from doe.ifta import ifta, iftaSoftQuantization
 
 #%% 8<------------------------------------ Parameters -------------------------------------------
 
-make_plot = 0
+make_plot = 1
 
                          ################# Requierments ###################
         
@@ -141,11 +142,14 @@ for i in range(n_replications):
 
 #%% 8<----------------------------------------- Light Propagation ---------------------------------------------
 
-image_holo_replicated = np.abs(np.fft.fftshift(np.fft.fft2(
-    np.exp(1j*phase_holo_replicated))))**2                   # image formed when replicating hologram
+amplitude = Gaussian(size_support=phase_holo_replicated.shape[0], pixel_pitch=optic_pp, sigma=w_z/2**0.5)
 
+field = np.exp(1j*phase_holo_replicated)#*amplitude
+image_holo_replicated = np.abs(np.fft.fftshift(np.fft.fft2(field)))**2                   # image formed when replicating hologram
+
+field_sq = amplitude*np.exp(1j*phase_holo_sq_replicated)
 image_holo_sq_replicated = np.abs(np.fft.fftshift(np.fft.fft2(
-    np.exp(1j*phase_holo_sq_replicated))))**2                # image formed when replicating hologram 
+    field_sq)))**2                # image formed when replicating hologram 
                                                              # obtained with soft quantization
 
 #%% 8<--------------------------------------- Fresnel lens addition -----------------------------------------

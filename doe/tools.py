@@ -137,8 +137,46 @@ def getCartesianCoordinates(nrows, **kargs):
     [X, Y] = np.meshgrid(np.arange(-ncols//2+ncols%2, ncols//2+ncols%2), 
                          np.arange(nrows//2-1+nrows%2, -nrows//2-1+nrows%2, step=-1))
     
-    return [X,Y]
+    return np.array([X,Y])
 
+def ZerosPadding(array, *, zeros_padding_factor=2, dtype=complex):
+    
+    """
+    ZerosPadding : generate a zero padded version of input array
+    
+    Author : Francois Leroux
+    Contact : francois.leroux.pro@gmail.com
+    Status : in progress
+    Last update : 2024.03.05, Brest
+    Comments :
+      
+    Inputs : MANDATORY : array {np.array 2D} : the array to zeros padd
+    
+              OPTIONAL : zeros_padding_factor {int} : the zeros padding factor
+                        
+    Outputs : array_zeros_padded : the array zeros padded
+    """
 
+    array_zeros_padded = np.zeros(zeros_padding_factor*np.array(array.shape), dtype=dtype)
+    array_zeros_padded[:array.shape[0], :array.shape[1]] = array
+    
+    return array_zeros_padded
+    
+def agrandir_image(image, n):
+    """
+    ZerosPadding : generate a zero padded version of input array
+    
+    Author : Francois Leroux, Chat GPT was used.
+    Contact : francois.leroux.pro@gmail.com
+    Status : in progress
+    Last update : 2024.03.05, Brest
+    Comments : Peut servir à augmenter la taille 
+      
+    Inputs : MANDATORY : array {np.array 2D} : the array to zeros padd
+    
+              OPTIONAL : zeros_padding_factor {int} : the zeros padding factor
+                        
+    Outputs : array_zeros_padded : the array zeros padded
+    """   
 
-
+    return np.kron(image, np.ones((n, n)))
