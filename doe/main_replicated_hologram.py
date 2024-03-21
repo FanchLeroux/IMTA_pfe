@@ -87,35 +87,44 @@ n_points = 3
 
 separation = 0.5e-3 #2*w_0_prime # [m] step of the Dirac comb in image plane, i.e separation between two samples dots
 
-replication_step = wavelength * d2 / separation # [m] step of the Dirac comb in optic space, i.e separation
-                                                # between two replicated holograms, i.e hologram side length
+holo_length = wavelength * d2 / separation # [m] step of the Dirac comb in optic space, i.e separation
+                                           # between two replicated holograms, i.e hologram side length
 
-holo_size = np.array([replication_step//optic_pp - (replication_step//optic_pp)%2]*2, dtype=int)                                                
+holo_size = np.array([holo_length//optic_pp - (holo_length//optic_pp)%2]*2, dtype=int)                                                
 
-n_replications = int(optic_length//replication_step)
+n_replications = int(optic_length//holo_length)
+optic_length = n_replications * holo_length # [m] final optic side length
 
-target_suport = np.zeros(holo_size) # support of the target image
+target_suport = np.zeros(holo_size) # support of the target image. same size as holo
 
-target_pp = wavelength * d2 / replication_step # optic_length or replication_step at the denominator ?
+target_pp = wavelength * d2 / holo_length # [m] pixel pitch in image plane without replication
 
-target_length = n_points*separation # [m]
+target_length = n_points*separation # [m] length of the zone in target that should be filled with ones (see next lines)
 
-target_size = np.array([target_length//target_pp + np.ceil(target_length%target_pp)]*2, dtype=int)
+target_size = np.array([target_length//target_pp + np.ceil(target_length%target_pp)]*2, dtype=int) # [px]
 
 target_suport[target_suport.shape[0]//2-target_size[0]//2:target_suport.shape[0]//2+target_size[0]//2+target_size[0]%2,
-              target_suport.shape[1]//2-target_size[1]//2:target_suport.shape[1]//2+target_size[1]//2+target_size[1]%2] = np.ones(target_size)
+              target_suport.shape[1]//2-target_size[1]//2:target_suport.shape[1]//2+target_size[1]//2+target_size[1]%2] \
+              = np.ones(target_size) # padding the zone that will be multiplied by the dirac comb in image space with ones
 
-phase_holo, recovery, efficiency = iftaSoftQuantization(target_suport, target_suport.shape, n_levels=n_levels, compute_efficiency=1, 
-                                       rfact=1.2, n_iter=20)
+phase_holo, recovery, efficiency = ifta(target_suport, target_suport.shape, n_levels=n_levels, 
+                                                        compute_efficiency=1, rfact=1.2, 
+                                                        n_iter=20) # ifta to compute hologram
+                                                                   # that will be replicated
+
+phase_holo_sq, recovery_sq, efficiency_sq = iftaSoftQuantization(target_suport, target_suport.shape, n_levels=n_levels, 
+                                                        compute_efficiency=1, rfact=1.2, 
+                                                        n_iter=20) # ifta with phase soft quantization to compute hologram
+                                                                   # that will be replicated
 
 
 #%%
-phase_holo_replicated = np.full(n_replications*holo_size, np.nan)
+phase_holo_sq_replicated = np.full(n_replications*holo_size, np.nan)
 
 for i in range(n_replications):
     for j in range(n_replications):
-            phase_holo_replicated[i*holo_size[0]:(i+1)*holo_size[0],
-                                  j*holo_size[1]:(j+1)*holo_size[1]] = phase_holo
+            phase_holo_sq_replicated[i*holo_size[0]:(i+1)*holo_size[0],
+                                  j*holo_size[1]:(j+1)*holo_size[1]] = phase_holo_sq
 
 #%%
 
@@ -123,10 +132,10 @@ for i in range(n_replications):
 
 #%%
 
-image_pp = wavelength * d2 / (phase_holo_replicated.shape[0]*optic_pp) # [m] pixel pitch on image plane
+image_pp = wavelength * d2 / (phase_holo_sq_replicated.shape[0]*optic_pp) # [m] pixel pitch on image plane
 
-image_holo = np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phase_holo))))**2
-image_holo_replicated = np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phase_holo_replicated))))**2
+image_holo = np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phase_holo_sq))))**2
+image_holo_replicated = np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phase_holo_sq_replicated))))**2
 
 holo_window = 20
 holo_replicated_window = 2*int(separation * n_points // image_pp)
@@ -147,8 +156,8 @@ x_axis = image_pp * X[0,:]
 y_axis = image_pp * Y[:,0]
 
 fig, axs = plt.subplots(nrows=2, ncols=3)
-axs[0,0].imshow(phase_holo)
-axs[0,1].imshow(phase_holo_replicated)
+axs[0,0].imshow(phase_holo_sq)
+axs[0,1].imshow(phase_holo_sq_replicated)
 axs[1,0].imshow(image_holo_cropped)
 
 #image_holo_replicated_cropped[image_holo_replicated_cropped<np.max(image_holo_replicated_cropped)/100] = 0 # seuillage
