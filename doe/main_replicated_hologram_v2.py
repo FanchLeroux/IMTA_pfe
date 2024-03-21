@@ -34,7 +34,7 @@ from doe.gaussianBeams import getGaussianBeamRadius, getCollectorLengthMini, get
                               gaussianEfficiency, getImageWaist, divergenceToWaist
 from doe.ifta import ifta, iftaSoftQuantization
 
-#%% 8<------------------------------------ Parameters ------------------------------------------
+#%% 8<------------------------------------ Parameters -------------------------------------------
 
                          ################# Requierments ###################
         
@@ -85,7 +85,7 @@ optic_length = optic_length_mini + optic_length_factor*(optic_length_maxi - opti
 
 n_points = 3
 
-separation = 100e-6 #2*w_0_prime # [m] step of the Dirac comb in image plane, i.e separation between two samples dots
+separation = 0.5e-3 #2*w_0_prime # [m] step of the Dirac comb in image plane, i.e separation between two samples dots
 
 replication_step = wavelength * d2 / separation # [m] step of the Dirac comb in optic space, i.e separation
                                                 # between two replicated holograms, i.e hologram side length
@@ -119,44 +119,50 @@ for i in range(n_replications):
 
 #%%
 
+#phase_lens = lens(f, wavelength=wavelength, sizeSupport=optic_size, samplingStep=optic_pp, n_levels=0)
+
+#%%
+
 image_pp = wavelength * d2 / (phase_holo_replicated.shape[0]*optic_pp) # [m] pixel pitch on image plane
 
 image_holo = np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phase_holo))))**2
 image_holo_replicated = np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phase_holo_replicated))))**2
 
 holo_window = 20
-holo_replicated_window = image_holo_replicated.shape[0]#int((n_points+10)*separation//image_pp)
+holo_replicated_window = 2*int(separation * n_points // image_pp)
 
-image_holo_max = np.where(image_holo==np.max(image_holo))
-image_holo_cropped = image_holo[image_holo_max[0][0]-holo_window//2:image_holo_max[0][0]+holo_window//2, 
-                                image_holo_max[1][0]-holo_window//2:image_holo_max[1][0]+holo_window//2]
+image_holo_cropped = image_holo[image_holo.shape[0]//2-holo_window:image_holo.shape[0]//2+holo_window, 
+                                image_holo.shape[0]//2-holo_window:image_holo.shape[0]//2+holo_window]
 
-
-image_holo_replicated_max = np.where(image_holo_replicated==np.max(image_holo_replicated))
-image_holo_replicated_cropped = image_holo_replicated[image_holo_replicated_max[0][0]-
-                                                      holo_replicated_window//2 : image_holo_replicated_max[0][0]+
+image_holo_replicated_cropped = image_holo_replicated[image_holo_replicated.shape[0]//2-
+                                                      holo_replicated_window//2 : image_holo_replicated.shape[0]//2+
                                                       holo_replicated_window//2, 
-                                image_holo_replicated_max[1][0]-holo_replicated_window//2:image_holo_replicated_max[1][0]+
+                                image_holo_replicated.shape[0]//2-holo_replicated_window//2:image_holo_replicated.shape[0]//2+
                                 holo_replicated_window//2]
 
 # %%
 
-
-[X,Y] = getCartesianCoordinates(image_holo_cropped.shape[0])
+[X,Y] = getCartesianCoordinates(image_holo_replicated_cropped.shape[0])
 x_axis = image_pp * X[0,:]
 y_axis = image_pp * Y[:,0]
 
-fig, axs = plt.subplots(nrows=2, ncols=2)
+fig, axs = plt.subplots(nrows=2, ncols=3)
 axs[0,0].imshow(phase_holo)
 axs[0,1].imshow(phase_holo_replicated)
 axs[1,0].imshow(image_holo_cropped)
 
+#image_holo_replicated_cropped[image_holo_replicated_cropped<np.max(image_holo_replicated_cropped)/100] = 0 # seuillage
+
 axs[1,1].imshow(image_holo_replicated_cropped, extent=                                   # [µm]
-                        1e6*np.array([x_axis[0], x_axis[-1], 
+                        1e6*np.array([x_axis[0], x_axis[-1],
                                       y_axis[-1], y_axis[0]]))
+
 axs[1,1].set_xlabel("[µm]")
 axs[1,1].set_ylabel("[µm]")
 
+axs[0,2].plot(1e6*x_axis, image_holo_replicated_cropped[:,image_holo_replicated_cropped.shape[1]//2])
+
+axs[0,2].set_xlabel("[µm]")
 
 # target = gridSquares(nPointsX = 3, spacing=1, width=1)
 
@@ -165,18 +171,3 @@ axs[1,1].set_ylabel("[µm]")
 # holo_length = 1/image_pp # [m] side length of one hologram
 
 # holo_size = np.array([holo_length//optic_pp + (holo_length//optic_pp)%2]*2)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
