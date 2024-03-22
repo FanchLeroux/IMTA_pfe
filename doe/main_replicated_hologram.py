@@ -37,7 +37,8 @@ from doe.ifta import ifta, iftaSoftQuantization
 
 #%% 8<------------------------------------ Parameters -------------------------------------------
 
-make_plot = 1
+make_plot = 1  # make plot
+sq = 0         # use soft quantization
 
                          ################# Requierments ###################
         
@@ -114,108 +115,158 @@ target_suport[target_suport.shape[0]//2-target_size[0]//2:target_suport.shape[0]
 
 #%% 8<----------------------------------------- IFTA ---------------------------------------------
 
-phase_holo, recovery, efficiency = ifta(target_suport, target_suport.shape, n_levels=n_levels, 
-                                                        compute_efficiency=1, rfact=1.2, 
-                                                        n_iter=20) # ifta to compute hologram
-                                                                   # that will be replicated
+if not(sq):
+    phase_holo, recovery, efficiency = ifta(target_suport, target_suport.shape, n_levels=n_levels, 
+                                                            compute_efficiency=1, rfact=1.2, 
+                                                            n_iter=20) # ifta to compute hologram
+                                                                       # that will be replicated
+                                                                       
+    phase_holo_replicated = np.full(n_replications*holo_size, np.nan)
 
-phase_holo_sq, recovery_sq, efficiency_sq = iftaSoftQuantization(target_suport, target_suport.shape, n_levels=n_levels, 
-                                                        compute_efficiency=1, rfact=1.2, 
-                                                        n_iter=20) # ifta with phase soft quantization to compute hologram
-                                                                   # that will be replicated
+    for i in range(n_replications):
+        for j in range(n_replications):
+                phase_holo_replicated[i*holo_size[0]:(i+1)*holo_size[0],
+                                      j*holo_size[1]:(j+1)*holo_size[1]] = phase_holo
+                                                                   
+else:
+    phase_holo_sq, recovery_sq, efficiency_sq = iftaSoftQuantization(target_suport, target_suport.shape, n_levels=n_levels, 
+                                                            compute_efficiency=1, rfact=1.2, 
+                                                            n_iter=20) # ifta with phase soft quantization to compute hologram
+                                                                       # that will be replicated
 
-#%% 8<----------------------------------------- Replication ---------------------------------------------
+    phase_holo_sq_replicated = np.full(n_replications*holo_size, np.nan)
 
-phase_holo_sq_replicated = np.full(n_replications*holo_size, np.nan)
-
-for i in range(n_replications):
-    for j in range(n_replications):
-            phase_holo_sq_replicated[i*holo_size[0]:(i+1)*holo_size[0],
-                                  j*holo_size[1]:(j+1)*holo_size[1]] = phase_holo_sq
-            
-phase_holo_replicated = np.full(n_replications*holo_size, np.nan)
-
-for i in range(n_replications):
-    for j in range(n_replications):
-            phase_holo_replicated[i*holo_size[0]:(i+1)*holo_size[0],
-                                  j*holo_size[1]:(j+1)*holo_size[1]] = phase_holo
-
-#%% 8<----------------------------------------- Light Propagation ---------------------------------------------
-
-amplitude = Gaussian(size_support=phase_holo_replicated.shape[0], pixel_pitch=optic_pp, sigma=w_z/2**0.5)
-
-field = np.exp(1j*phase_holo_replicated)#*amplitude
-image_holo_replicated = np.abs(np.fft.fftshift(np.fft.fft2(field)))**2                   # image formed when replicating hologram
-
-field_sq = amplitude*np.exp(1j*phase_holo_sq_replicated)
-image_holo_sq_replicated = np.abs(np.fft.fftshift(np.fft.fft2(
-    field_sq)))**2                # image formed when replicating hologram 
-                                                             # obtained with soft quantization
-
-#%% 8<--------------------------------------- Fresnel lens addition -----------------------------------------
-
-phase_lens = lens(f, wavelength=wavelength, sizeSupport=phase_holo_replicated.shape, samplingStep=optic_pp, n_levels=0)
-
-phase_holo_replicated = discretization(phase_holo_replicated + phase_lens, n_levels=2)
+    for i in range(n_replications):
+        for j in range(n_replications):
+                phase_holo_sq_replicated[i*holo_size[0]:(i+1)*holo_size[0],
+                                      j*holo_size[1]:(j+1)*holo_size[1]] = phase_holo_sq
 
 #%% 8<------------------------------------------------ Plots ---------------------------------------------------
 
 if make_plot:
-    
-    image_pp = wavelength * d2 / (phase_holo_sq_replicated.shape[0]*optic_pp)         # [m] pixel pitch on image plane
+    if not(sq):
 
-    image_holo = np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phase_holo))))**2       # image given by a single hologram
+        ############################################ Physical Units ####################################################
 
-    image_holo_sq = np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phase_holo_sq))))**2 # image given by a single hologram
-    
-    image_holo_sq_window = int(2*target_size[0])
-    image_holo_sq_replicated_window = 2*int(separation * n_points // image_pp)
+        image_pp = wavelength * d2 / (phase_holo_replicated.shape[0]*optic_pp)         # [m] pixel pitch on image plane       
 
-    image_holo_sq_cropped = image_holo_sq[image_holo_sq.shape[0]//2-image_holo_sq_window:
-                                    image_holo_sq.shape[0]//2+image_holo_sq_window, 
-                                    image_holo_sq.shape[0]//2-image_holo_sq_window:
-                                    image_holo_sq.shape[0]//2+image_holo_sq_window]
+        image_holo_sq_window = int(2*target_size[0])
+        image_holo_sq_replicated_window = 2*int(separation * n_points // image_pp)
 
-    image_holo_sq_replicated_cropped = image_holo_sq_replicated[image_holo_sq_replicated.shape[0]//2-
-                                    image_holo_sq_replicated_window//2 : image_holo_sq_replicated.shape[0]//2+
-                                    image_holo_sq_replicated_window//2, 
-                                    image_holo_sq_replicated.shape[0]//2-image_holo_sq_replicated_window//2:
-                                    image_holo_sq_replicated.shape[0]//2+image_holo_sq_replicated_window//2]
+        ######################################## Fresnel lens addition #################################################
+
+        phase_lens = lens(f, wavelength=wavelength, sizeSupport=phase_holo_replicated.shape, samplingStep=optic_pp, n_levels=0)
+        phase_holo_replicated_fresnel = discretization(phase_holo_replicated + phase_lens, n_levels=2)
+
         
-    image_holo_replicated_cropped = image_holo_replicated[image_holo_sq_replicated.shape[0]//2-
-                                    image_holo_sq_replicated_window//2 : image_holo_sq_replicated.shape[0]//2+
-                                    image_holo_sq_replicated_window//2, 
-                                    image_holo_sq_replicated.shape[0]//2-image_holo_sq_replicated_window//2:
-                                    image_holo_sq_replicated.shape[0]//2+image_holo_sq_replicated_window//2]
-    
-    [X,Y] = getCartesianCoordinates(image_holo_sq_replicated_cropped.shape[0])
-    x_axis = image_pp * X[0,:]
-    y_axis = image_pp * Y[:,0]
-    
-    fig, axs = plt.subplots(nrows=2, ncols=3)
-    
-    axs[0,0].imshow(phase_holo_sq)
-    
-    axs[0,1].imshow(phase_holo_sq_replicated)
-    
-    axs[1,0].imshow(image_holo_sq_cropped)
-    
-    axs[1,1].imshow(image_holo_sq_replicated_cropped, extent=               # [µm]
-                            1e6*np.array([x_axis[0], x_axis[-1],
-                                          y_axis[-1], y_axis[0]]))
-    axs[1,1].set_xlabel("[µm]")
-    axs[1,1].set_ylabel("[µm]")
-    
-    axs[0,2].plot(1e6*x_axis, image_holo_sq_replicated_cropped[:,image_holo_sq_replicated_cropped.shape[1]//2])
-    axs[0,2].set_xlabel("[µm]")
-    axs[0,2].set_title("with soft quantization")
-    
-    axs[1,2].plot(1e6*x_axis, image_holo_replicated_cropped[:,image_holo_sq_replicated_cropped.shape[1]//2])
-    axs[1,2].set_xlabel("[µm]")
-    axs[1,2].set_title("no soft quantization")
+        ###################################### Light Propagation ###############################################
 
+        image_holo = np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phase_holo))))**2  # image given by a single hologram
+                                                                                     # under plane wave illumination
+        image_holo_cropped = image_holo[image_holo.shape[0]//2-image_holo_sq_window:
+                                        image_holo.shape[0]//2+image_holo_sq_window, 
+                                        image_holo.shape[0]//2-image_holo_sq_window:
+                                        image_holo.shape[0]//2+image_holo_sq_window]
 
+        amplitude = Gaussian(size_support=phase_holo_replicated.shape[0], pixel_pitch=optic_pp, sigma=w_z/2**0.5)
+    
+        field = np.exp(1j*phase_holo_replicated)
+        image_holo_replicated = np.abs(np.fft.fftshift(np.fft.fft2(field)))**2 # image formed when replicating hologram
+            
+        image_holo_replicated_cropped = image_holo_replicated[image_holo_replicated.shape[0]//2-
+                                        image_holo_sq_replicated_window//2 : image_holo_replicated.shape[0]//2+
+                                        image_holo_sq_replicated_window//2, 
+                                        image_holo_replicated.shape[0]//2-image_holo_sq_replicated_window//2:
+                                        image_holo_replicated.shape[0]//2+image_holo_sq_replicated_window//2]
+        
+        [X,Y] = getCartesianCoordinates(image_holo_replicated_cropped.shape[0])
+        x_axis = image_pp * X[0,:]
+        y_axis = image_pp * Y[:,0]
+        
+        fig, axs = plt.subplots(nrows=2, ncols=3)
+        
+        axs[0,0].imshow(phase_holo)
+        
+        axs[0,1].imshow(phase_holo_replicated)
+        
+        axs[1,0].imshow(image_holo_cropped)
+        
+        axs[1,1].imshow(image_holo_replicated_cropped, extent=               # [µm]
+                                1e6*np.array([x_axis[0], x_axis[-1],
+                                              y_axis[-1], y_axis[0]]))
+        axs[1,1].set_xlabel("[µm]")
+        axs[1,1].set_ylabel("[µm]")
+        
+        axs[1,2].plot(1e6*x_axis, image_holo_replicated_cropped[:,image_holo_replicated_cropped.shape[1]//2])
+        axs[1,2].set_xlabel("[µm]")
+        axs[1,2].set_title("no soft quantization")
+        
+        axs[0,2].axis('off')
+        
+        
+    else:
+        
+        ############################################ Physical Units ####################################################
 
+        image_pp = wavelength * d2 / (phase_holo_replicated.shape[0]*optic_pp)         # [m] pixel pitch on image plane
+        
+        image_holo_sq_window = int(2*target_size[0])
+        image_holo_sq_replicated_window = 2*int(separation * n_points // image_pp)
+        
+        ######################################## Fresnel lens addition #################################################
+
+        phase_lens = lens(f, wavelength=wavelength, sizeSupport=phase_holo_sq_replicated.shape, samplingStep=optic_pp, n_levels=0)
+        phase_holo_sq_replicated_fresnel = discretization(phase_holo_sq_replicated + phase_lens, n_levels=2)
+        
+        ############################################# Else ############################################################
+        
+        image_holo_sq = np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phase_holo_sq))))**2 # image given by a single soft-quantized
+                                                                                          # hologram under plane wave illumination
+        
+        amplitude = Gaussian(size_support=phase_holo_sq_replicated.shape[0], pixel_pitch=optic_pp, sigma=w_z/2**0.5)
+        
+        field_sq = amplitude*np.exp(1j*phase_holo_sq_replicated)
+        image_holo_sq_replicated = np.abs(np.fft.fftshift(np.fft.fft2(field_sq)))**2 # image formed when replicating hologram 
+                                                                                     # obtained with soft quantization
+    
+        image_holo_sq_cropped = image_holo_sq[image_holo_sq.shape[0]//2-image_holo_sq_window:
+                                        image_holo_sq.shape[0]//2+image_holo_sq_window, 
+                                        image_holo_sq.shape[0]//2-image_holo_sq_window:
+                                        image_holo_sq.shape[0]//2+image_holo_sq_window]
+    
+        image_holo_sq_replicated_cropped = image_holo_sq_replicated[image_holo_sq_replicated.shape[0]//2-
+                                        image_holo_sq_replicated_window//2 : image_holo_sq_replicated.shape[0]//2+
+                                        image_holo_sq_replicated_window//2, 
+                                        image_holo_sq_replicated.shape[0]//2-image_holo_sq_replicated_window//2:
+                                        image_holo_sq_replicated.shape[0]//2+image_holo_sq_replicated_window//2]
+                                                                 
+        [X,Y] = getCartesianCoordinates(image_holo_sq_replicated_cropped.shape[0])
+        x_axis = image_pp * X[0,:]
+        y_axis = image_pp * Y[:,0]
+        
+        fig, axs = plt.subplots(nrows=2, ncols=3)
+        
+        axs[0,0].imshow(phase_holo_sq)
+        
+        axs[0,1].imshow(phase_holo_sq_replicated)
+        
+        axs[0,2].axis('off')
+        
+        axs[1,0].imshow(image_holo_sq_cropped)
+        
+        axs[1,1].imshow(image_holo_sq_replicated_cropped, extent=               # [µm]
+                                1e6*np.array([x_axis[0], x_axis[-1],
+                                              y_axis[-1], y_axis[0]]))
+        axs[1,1].set_xlabel("[µm]")
+        axs[1,1].set_ylabel("[µm]")
+        
+        axs[0,2].plot(1e6*x_axis, image_holo_sq_replicated_cropped[:,image_holo_sq_replicated_cropped.shape[1]//2])
+        axs[0,2].set_xlabel("[µm]")
+        axs[0,2].set_title("with soft quantization")
+        
+        axs[1,2].plot(1e6*x_axis, image_holo_replicated_cropped[:,image_holo_sq_replicated_cropped.shape[1]//2])
+        axs[1,2].set_xlabel("[µm]")
+        axs[1,2].set_title("no soft quantization")
 
 
 
