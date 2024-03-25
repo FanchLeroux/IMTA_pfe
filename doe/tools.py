@@ -162,9 +162,12 @@ def ZerosPadding(array, *, zeros_padding_factor=2, dtype=complex):
     
     return array_zeros_padded
     
-def agrandir_image(image, n):
+def ReverseBinning(image, n):
+    
     """
-    ZerosPadding : generate a zero padded version of input array
+    ReverseBinning : replace one pixel of image by a square of n by n pixels
+                     in order to compute a larger area in the Fourrier domain 
+                     with np.fft
     
     Author : Francois Leroux, Chat GPT was used.
     Contact : francois.leroux.pro@gmail.com
@@ -177,6 +180,36 @@ def agrandir_image(image, n):
               OPTIONAL : zeros_padding_factor {int} : the zeros padding factor
                         
     Outputs : array_zeros_padded : the array zeros padded
-    """   
+    """
 
     return np.kron(image, np.ones((n, n)))
+
+def Replicate(phase_holo, n_replications):
+    
+    """
+    Replicate : replicate an hologram n_replications times in x and y directions
+    
+    Author : Francois Leroux, Chat GPT was used.
+    Contact : francois.leroux.pro@gmail.com
+    Status : in progress
+    Last update : 2024.03.05, Brest
+    Comments : Peut servir à augmenter la taille 
+      
+    Inputs : MANDATORY : array {np.array 2D} : the array to zeros padd
+    
+              OPTIONAL : zeros_padding_factor {int} : the zeros padding factor
+                        
+    Outputs : array_zeros_padded : the array zeros padded
+    """
+
+    phase_holo_replicated = np.full(np.array(phase_holo.shape) * n_replications, np.NAN)
+
+    for i in range(n_replications):
+        for j in range(n_replications):
+                phase_holo_replicated[i*phase_holo.shape[0]:(i+1)*phase_holo.shape[0],
+                                      j*phase_holo.shape[1]:(j+1)*phase_holo.shape[1]] = phase_holo
+                
+    return phase_holo_replicated
+
+
+

@@ -87,7 +87,7 @@ optic_length = optic_length_mini + optic_length_factor*(optic_length_maxi - opti
 
 #%% 8<--------------------------------- Replication workflow --------------------------------------
 
-n_points = 3
+n_points = 5
 
 separation = 0.5e-3                         # [m] step of the Dirac comb in image plane, i.e separation between 
                                             # two samples dots
@@ -170,7 +170,7 @@ if make_plot:
 
         amplitude = Gaussian(size_support=phase_holo_replicated.shape[0], pixel_pitch=optic_pp, sigma=w_z/2**0.5)
     
-        field = np.exp(1j*phase_holo_replicated)
+        field = amplitude*np.exp(1j*phase_holo_replicated)
         image_holo_replicated = np.abs(np.fft.fftshift(np.fft.fft2(field)))**2 # image formed when replicating hologram
             
         image_holo_replicated_cropped = image_holo_replicated[image_holo_replicated.shape[0]//2-
@@ -179,30 +179,46 @@ if make_plot:
                                         image_holo_replicated.shape[0]//2-image_holo_sq_replicated_window//2:
                                         image_holo_replicated.shape[0]//2+image_holo_sq_replicated_window//2]
         
+        [X,Y] = getCartesianCoordinates(phase_holo_replicated.shape[0])
+        x_axis = optic_pp * X[0,:]
+        y_axis = optic_pp * Y[:,0]
+            
         [X,Y] = getCartesianCoordinates(image_holo_replicated_cropped.shape[0])
-        x_axis = image_pp * X[0,:]
-        y_axis = image_pp * Y[:,0]
+        x_axis_cropped = image_pp * X[0,:]
+        y_axis_cropped = image_pp * Y[:,0]
         
         fig, axs = plt.subplots(nrows=2, ncols=3)
         
         axs[0,0].imshow(phase_holo)
+        axs[0,0].set_title("phase, one period")
         
-        axs[0,1].imshow(phase_holo_replicated)
-        
-        axs[1,0].imshow(image_holo_cropped)
-        
-        axs[1,1].imshow(image_holo_replicated_cropped, extent=               # [µm]
+        axs[0,1].imshow(phase_holo_replicated, extent=               # [µm]
                                 1e6*np.array([x_axis[0], x_axis[-1],
                                               y_axis[-1], y_axis[0]]))
+        axs[0,1].set_title("phase, replicated hologram")
+        axs[0,1].set_xlabel("[µm]")        
+        axs[0,1].set_ylabel("[µm]")
+        
+        axs[0,2].imshow(phase_holo_replicated_fresnel, extent=               # [µm]
+                                1e6*np.array([x_axis[0], x_axis[-1],
+                                              y_axis[-1], y_axis[0]]))
+        axs[0,2].set_title("phase, replicated hologram and Fresnel lens")
+        axs[0,2].set_xlabel("[µm]")        
+        axs[0,2].set_ylabel("[µm]")
+        
+        axs[1,0].imshow(image_holo_cropped)
+        axs[1,0].set_title("image formed by one period")
+        
+        axs[1,1].imshow(image_holo_replicated_cropped+1, extent=               # [µm]
+                                1e6*np.array([x_axis_cropped[0], x_axis_cropped[-1],
+                                              y_axis_cropped[-1], y_axis_cropped[0]]))
         axs[1,1].set_xlabel("[µm]")
         axs[1,1].set_ylabel("[µm]")
+        axs[1,1].set_title("log scale, gaussian amplitude propagation\nthrough replicated hologram")
         
-        axs[1,2].plot(1e6*x_axis, image_holo_replicated_cropped[:,image_holo_replicated_cropped.shape[1]//2])
+        axs[1,2].plot(1e6*x_axis_cropped, image_holo_replicated_cropped[:,image_holo_replicated_cropped.shape[1]//2])
         axs[1,2].set_xlabel("[µm]")
-        axs[1,2].set_title("no soft quantization")
-        
-        axs[0,2].axis('off')
-        
+        axs[1,2].set_title("crossY")
         
     else:
         
@@ -241,8 +257,8 @@ if make_plot:
                                         image_holo_sq_replicated.shape[0]//2+image_holo_sq_replicated_window//2]
                                                                  
         [X,Y] = getCartesianCoordinates(image_holo_sq_replicated_cropped.shape[0])
-        x_axis = image_pp * X[0,:]
-        y_axis = image_pp * Y[:,0]
+        x_axis_cropped = image_pp * X[0,:]
+        y_axis_cropped = image_pp * Y[:,0]
         
         fig, axs = plt.subplots(nrows=2, ncols=3)
         
@@ -255,22 +271,20 @@ if make_plot:
         axs[1,0].imshow(image_holo_sq_cropped)
         
         axs[1,1].imshow(image_holo_sq_replicated_cropped, extent=               # [µm]
-                                1e6*np.array([x_axis[0], x_axis[-1],
-                                              y_axis[-1], y_axis[0]]))
+                                1e6*np.array([x_axis_cropped[0], x_axis_cropped[-1],
+                                              y_axis_cropped[-1], y_axis_cropped[0]]))
         axs[1,1].set_xlabel("[µm]")
         axs[1,1].set_ylabel("[µm]")
         
-        axs[0,2].plot(1e6*x_axis, image_holo_sq_replicated_cropped[:,image_holo_sq_replicated_cropped.shape[1]//2])
+        axs[0,2].plot(1e6*x_axis_cropped, image_holo_sq_replicated_cropped[:,image_holo_sq_replicated_cropped.shape[1]//2])
         axs[0,2].set_xlabel("[µm]")
         axs[0,2].set_title("with soft quantization")
         
-        axs[1,2].plot(1e6*x_axis, image_holo_replicated_cropped[:,image_holo_sq_replicated_cropped.shape[1]//2])
+        axs[1,2].plot(1e6*x_axis_cropped, image_holo_replicated_cropped[:,image_holo_sq_replicated_cropped.shape[1]//2])
         axs[1,2].set_xlabel("[µm]")
         axs[1,2].set_title("no soft quantization")
 
-
-
-
+plt.tight_layout()
 
 
 

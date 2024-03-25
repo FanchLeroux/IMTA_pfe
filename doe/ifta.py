@@ -22,7 +22,7 @@ from doe.tools import discretization, softDiscretization
 
 
 
-def ifta(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels = 0, compute_efficiency = 0):
+def ifta(target, doe_size, *, n_iter=25, rfact=1.2, n_levels=0, compute_efficiency=0, seed=0):
 
 #8<---------------------------------------------------------------------------------------------
 # kative Fourier Transform Algorithm
@@ -53,7 +53,13 @@ def ifta(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels = 0, compute_ef
     amp_image = np.zeros(doe_size)                                                                             # Amplitude output field = 0
     amp_image[doe_size[0]//2-target_size[0]//2:doe_size[0]//2-target_size[0]//2+target_size[0], 
               doe_size[1]//2-target_size[1]//2:doe_size[1]//2-target_size[1]//2+target_size[1]] = target_amp   # Amplitude = target image in window
-    phase_image = 2*np.pi*np.random.rand(doe_size[0], doe_size[1])                                             # Random image phase    
+    
+    
+    if type(seed) == int:
+        phase_image = 2*np.pi*np.random.rand(doe_size[0], doe_size[1]) # Random image phase
+    else:
+        phase_image = seed
+                                               
     field_image = amp_image*np.exp(1j * phase_image)                                                           # Initiate input field
     
     # First loop - continous phase screen computation
@@ -98,7 +104,7 @@ def ifta(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels = 0, compute_ef
 
 
 
-def iftaSoftQuantization(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels = 0, compute_efficiency = 0):
+def iftaSoftQuantization(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels = 0, compute_efficiency = 0, seed=0):
 
 #8<---------------------------------------------------------------------------------------------
 # kative Fourier Transform Algorithm
@@ -135,7 +141,13 @@ def iftaSoftQuantization(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels
               target_size[0]//2+target_size[0], 
               doe_size[1]//2-target_size[1]//2:doe_size[1]//2-
               target_size[1]//2+target_size[1]] = target_amp       # Amplitude = target image in window
-    phase_image = 2*np.pi*np.random.rand(doe_size[0], doe_size[1]) # Random image phase    
+    
+    
+    if type(seed) == int:
+        phase_image = 2*np.pi*np.random.rand(doe_size[0], doe_size[1]) # Random image phase
+    else:
+        phase_image = seed   
+    
     field_image = amp_image*np.exp(1j * phase_image)               # Initiate input field
     
     # First loop - continous phase screen computation
@@ -161,7 +173,7 @@ def iftaSoftQuantization(target, doe_size, *, n_iter = 25, rfact = 1.2, n_levels
         for k in range(n_iter):
             field_DOE = np.fft.ifft2(np.fft.ifftshift(field_image))    # field DOE = TF-1 field image
             phase_DOE = np.angle(field_DOE)                            # get DOE phase. phase values between 0 and 2pi 
-            phase_DOE = softDiscretization(phase_DOE, n_levels, half_interval=(k+1)*0.5/(k+1))                                                                 # phase discretization
+            phase_DOE = softDiscretization(phase_DOE, n_levels, half_interval=(k+1)*0.5/(n_iter))                                                                 # phase discretization
             field_DOE = np.exp(phase_DOE * 1j)                         # force the amplitude of the DOE to 1 (no losses)
             field_image = np.fft.fftshift(np.fft.fft2(field_DOE))      # image = TF du DOE
             phase_image = np.angle(field_image)                        # save image phase
