@@ -211,5 +211,12 @@ def Replicate(phase_holo, n_replications):
                 
     return phase_holo_replicated
 
+def PropagatePhaseScreen(phaseScreen):
+    return np.abs(np.fft.fftshift(np.fft.fft2(np.exp(1j*phaseScreen))))**2
+
+def PropagateComplexAmplitudeScreen(complexAmplitudeScreen):
+    return np.abs(np.fft.fftshift(np.fft.fft2(complexAmplitudeScreen)))**2
+
+
 
 

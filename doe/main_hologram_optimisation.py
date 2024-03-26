@@ -31,13 +31,21 @@ from doe.hologram_design import GetOpticLengthMinMax, GetHoloSize
 
 from doe.ifta import ifta, iftaSoftQuantization
 
-from doe.tools import Replicate, discretization
+from doe.tools import Replicate, discretization, PropagatePhaseScreen, PropagateComplexAmplitudeScreen
 
 from doe.performance_criterias import ComputeEfficiency, ComputeUniformity
 
 from doe.phaseScreens import lens
 
+from doe.amplitudeScreens import Gaussian
+
+from doe.gaussianBeams import getGaussianBeamRadius
+
+
+
 from PIL import Image
+
+import matplotlib.pyplot as plt
 
 #%% 8<---------------------------------------- Parameters -------------------------------------
 
@@ -112,8 +120,8 @@ for k in range(n_seeds):
                                                             compute_efficiency=0, rfact=rfact, 
                                                             n_iter=n_iter, seed=seed) # ifta to compute hologram
                                                                                       # that will be replicated
-                                                                                      # with soft quantization                                                                                      
-    
+                                                                                      # with soft quantization
+                                                                                      
 #%% 8<----------------- Estimation of the performances ------------------------------------------
 
             # Memory allocation #
@@ -172,13 +180,55 @@ phase_holo_replicated_uniformity[phase_holo_replicated_uniformity==np.pi] = 123
 phase_holo_replicated_efficiency_fresnel[phase_holo_replicated_efficiency_fresnel==np.pi] = 123
 phase_holo_replicated_uniformity_fresnel[phase_holo_replicated_uniformity_fresnel==np.pi] = 123
 
-cv2.imwrite(dir_results_pgm+"phase_lens_discretized.pgm", phase_lens_discretized)
+cv2.imwrite(dir_results_pgm+"phase_lens_discretized.pgm", np.asarray(phase_lens_discretized, dtype=np.uint8))
 
 cv2.imwrite(dir_results_pgm+"phase_holo_replicated_efficiency.pgm", phase_holo_replicated_efficiency)
 cv2.imwrite(dir_results_pgm+"phase_holo_replicated_uniformity.pgm", phase_holo_replicated_uniformity)
 
 cv2.imwrite(dir_results_pgm+"phase_holo_replicated_efficiency_fresnel.pgm", phase_holo_replicated_efficiency_fresnel)
 cv2.imwrite(dir_results_pgm+"phase_holo_replicated_uniformity_fresnel.pgm", phase_holo_replicated_uniformity_fresnel)
+
+#%% Compute gaussian amplitude
+
+w_z = getGaussianBeamRadius(wavelength=wavelength, divergence=divergence, propagation_distance=d1)
+amplitude = Gaussian(phase_holo_replicated_efficiency.shape[0], pixel_pitch=optic_pp, sigma=w_z/2**0.5)
+
+#%%
+
+fig, axs = plt.subplots(nrows=2, ncols=4)
+
+axs[0,0].axis("off")
+axs[0,0].imshow(phase_holo_replicated_efficiency)
+axs[0,0].set_title("hologram phase, best efficiency")
+
+axs[1,0].axis("off")
+axs[1,0].imshow(phase_holo_replicated_uniformity)
+axs[1,0].set_title("hologram phase, best uniformity")
+
+
+axs[0,1].axis("off")
+axs[0,1].imshow(PropagatePhaseScreen(phase_holo_replicated_efficiency*np.pi/123.0))
+axs[0,1].set_title("image formed, best efficiency")
+
+axs[1,1].axis("off")
+axs[1,1].imshow(PropagatePhaseScreen(phase_holo_replicated_uniformity))
+axs[1,1].set_title("image formed, best uniformity")
+
+axs[0,2].axis("off")
+axs[0,2].imshow(np.log(PropagateComplexAmplitudeScreen(amplitude*np.exp(1j*phase_holo_replicated_efficiency*np.pi/123.0))+1))
+axs[0,2].set_title("image formed, best efficiency\nlog scale and gaussian amplitude")
+
+axs[1,2].axis("off")
+axs[1,2].imshow(np.log(PropagateComplexAmplitudeScreen(amplitude*np.exp(1j*phase_holo_replicated_uniformity*np.pi/123.0))+1))
+axs[1,2].set_title("image formed, best uniformity\nlog scale and gaussian amplitude")
+
+axs[0,3].axis("off")
+axs[0,3].imshow(phase_holo_replicated_efficiency_fresnel)
+axs[0,3].set_title("hologram phase\nbest efficiency + Fresnel lens")
+
+axs[1,3].axis("off")
+axs[1,3].imshow(phase_holo_replicated_uniformity_fresnel)
+axs[1,3].set_title("hologram phase\nbest uniformity + Fresnel lens")
 
 
 
