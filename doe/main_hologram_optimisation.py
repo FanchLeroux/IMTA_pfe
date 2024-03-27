@@ -49,7 +49,7 @@ import matplotlib.pyplot as plt
 
 #%% 8<---------------------------------------- Parameters -------------------------------------
 
-n_seeds = 500                   # number of seeds considered
+n_seeds = 500                  # number of seeds considered
 
 n_iter = 500
 rfact = 1.2
@@ -172,13 +172,13 @@ np.save(dir_results_npy+"phase_holo_replicated_uniformity_fresnel", phase_holo_r
 
 #%% with phase values between 0 and 255 under .pgm file
 
-phase_lens_discretized[phase_lens_discretized==np.pi] = 123
+phase_lens_discretized[phase_lens_discretized==np.pi] = 255
 
-phase_holo_replicated_efficiency[phase_holo_replicated_efficiency==np.pi] = 123
-phase_holo_replicated_uniformity[phase_holo_replicated_uniformity==np.pi] = 123
+phase_holo_replicated_efficiency[phase_holo_replicated_efficiency==np.pi] = 255
+phase_holo_replicated_uniformity[phase_holo_replicated_uniformity==np.pi] = 255
 
-phase_holo_replicated_efficiency_fresnel[phase_holo_replicated_efficiency_fresnel==np.pi] = 123
-phase_holo_replicated_uniformity_fresnel[phase_holo_replicated_uniformity_fresnel==np.pi] = 123
+phase_holo_replicated_efficiency_fresnel[phase_holo_replicated_efficiency_fresnel==np.pi] = 255
+phase_holo_replicated_uniformity_fresnel[phase_holo_replicated_uniformity_fresnel==np.pi] = 255
 
 cv2.imwrite(dir_results_pgm+"phase_lens_discretized.pgm", np.asarray(phase_lens_discretized, dtype=np.uint8))
 
@@ -207,7 +207,7 @@ axs[1,0].set_title("hologram phase, best uniformity")
 
 
 axs[0,1].axis("off")
-axs[0,1].imshow(PropagatePhaseScreen(phase_holo_replicated_efficiency*np.pi/123.0))
+axs[0,1].imshow(PropagatePhaseScreen(phase_holo_replicated_efficiency*np.pi/255.0))
 axs[0,1].set_title("image formed, best efficiency")
 
 axs[1,1].axis("off")
@@ -215,11 +215,11 @@ axs[1,1].imshow(PropagatePhaseScreen(phase_holo_replicated_uniformity))
 axs[1,1].set_title("image formed, best uniformity")
 
 axs[0,2].axis("off")
-axs[0,2].imshow(np.log(PropagateComplexAmplitudeScreen(amplitude*np.exp(1j*phase_holo_replicated_efficiency*np.pi/123.0))+1))
+axs[0,2].imshow(np.log(PropagateComplexAmplitudeScreen(amplitude*np.exp(1j*phase_holo_replicated_efficiency*np.pi/255.0))+1))
 axs[0,2].set_title("image formed, best efficiency\nlog scale and gaussian amplitude")
 
 axs[1,2].axis("off")
-axs[1,2].imshow(np.log(PropagateComplexAmplitudeScreen(amplitude*np.exp(1j*phase_holo_replicated_uniformity*np.pi/123.0))+1))
+axs[1,2].imshow(np.log(PropagateComplexAmplitudeScreen(amplitude*np.exp(1j*phase_holo_replicated_uniformity*np.pi/255.0))+1))
 axs[1,2].set_title("image formed, best uniformity\nlog scale and gaussian amplitude")
 
 axs[0,3].axis("off")
